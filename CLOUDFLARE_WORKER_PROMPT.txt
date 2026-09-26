@@ -1,0 +1,112 @@
+# ================================================================================
+# CLOUDFLARE WORKERS AI / CLOUDFLARE DASHBOARD AI ASSISTANT DEPLOYMENT PROMPT
+# Dev’ai Controller — General AI Agent Platform & 7-Step Autonomous Governance
+# ================================================================================
+# Instructions: Copy and paste the entire block between the dashed lines below
+# directly into the Cloudflare Dashboard AI Assistant, Wrangler AI, or an AI coding agent.
+# --------------------------------------------------------------------------------
+
+You are deploying the "Dev’ai Controller" General AI Agent Platform production worker to my Cloudflare account.
+Configure, bind, and activate this Cloudflare Worker with the following exact production architecture and specifications:
+
+1. WORKER METADATA & RUNTIME:
+   - Worker Name: "devai-controller"
+   - Compatibility Date: "2026-03-01"
+   - Compatibility Flags: ["nodejs_compat"]
+   - Main Entrypoint: "cloudflare-worker.js"
+   - Static Asset Bucket: "./dist"
+
+2. CLOUDFLARE EDGE BINDINGS:
+   - Workers AI Binding:
+     [ai]
+     binding = "AI"
+     model = "@cf/meta/llama-3.3-70b-instruct"
+
+   - Cloudflare D1 Relational Database Binding:
+     [[d1_databases]]
+     binding = "DB"
+     database_name = "devai_production_db"
+     database_id = "[YOUR_D1_DATABASE_ID]"
+
+   - Cloudflare R2 Knowledge Document Storage:
+     [[r2_buckets]]
+     binding = "STORAGE"
+     bucket_name = "devai-knowledge-docs"
+
+   - Cloudflare Vectorize Semantic Search:
+     [[vectorize]]
+     binding = "VECTOR_INDEX"
+     index_name = "devai-knowledge-vectors"
+     dimensions = 768
+     metric = "cosine"
+
+   - Cloudflare Workers KV Cache & Config:
+     [[kv_namespaces]]
+     binding = "CONFIG_KV"
+     id = "[YOUR_KV_NAMESPACE_ID]"
+
+   - Cloudflare Durable Objects (Stateful Agent Sessions):
+     [durable_objects]
+     bindings = [
+       { name = "AGENT_SESSION", class_name = "AgentSessionDO" }
+     ]
+
+   - Cron Triggers (Scheduled Automations):
+     [triggers]
+     crons = ["*/15 * * * *"]
+
+3. REQUIRED ENCRYPTED SECRETS (Configure in Settings > Variables and Secrets):
+   - CLOUDFLARE_ACCOUNT_ID: [Your Cloudflare Account ID]
+   - CLOUDFLARE_API_TOKEN: [Cloudflare API Token with Workers AI: Read and Workers Scripts: Edit]
+   - RESEND_API_KEY: [Resend Transactional Mailer API Key starting with re_]
+   - GITHUB_TOKEN: [GitHub Personal Access Token with repo, workflow, read:user scopes]
+   - SUPABASE_URL: [Your Supabase PostgreSQL URL, e.g. https://xyz.supabase.co]
+   - SUPABASE_SERVICE_ROLE_KEY: [Supabase Service Role Key for backend audit logging]
+   - ADMIN_PASSWORD: [Administrative access password]
+   - WORKER_SECRET: [32-character random string for AES-256-GCM token encryption]
+
+4. OPERATIONAL 7-STEP CANONICAL AGENT GOVERNANCE SPECIFICATION:
+   The worker script strictly enforces the 7-step autonomous agent lifecycle across all autonomous workflows:
+   - Step 1 (Ingress): Understand the Request — validates tenant isolation, sanitizes prompt injections, and extracts intent.
+   - Step 2 (Reasoning): Build Executive Plan — constructs deterministic DAG, evaluates permissions risk, and sets SLA budget.
+   - Step 3 (Retrieval): Retrieve Knowledge & Prepare Tool Calls — queries Vectorize for attached Title IDs and prepares MCP inputs.
+   - Step 4 (Governance): Approval Gate — halts consequential side-effects until explicit operator cryptographic token is approved.
+   - Step 5 (Execution): Execute Approved Action — dispatches payloads via authorized MCP, Resend, or GitHub APIs with retry backoffs.
+   - Step 6 (Verification): Verify Outcome & Compare Resources — asserts actual returned state against expected contracts (zero drift).
+   - Step 7 (Telemetry): Audit Log — commits an immutable ledger record with SHA-256 cryptographic digest, latency, and step receipts.
+
+5. REST API ROUTING & CORS:
+   Expose the complete edge API catalog:
+   - GET  /api/health -> Edge status, colocation airport code, and active bindings
+   - GET  /api/status -> Multi-service operational monitor (Cloudflare, Supabase, GitHub, Resend)
+   - GET  /v1/agents -> List 6 platform agents (General, Developer, Knowledge, Customer Service, Design, Custom)
+   - GET  /v1/agents/:id -> Agent profile and permissions
+   - GET  /v1/agents/:id/flow -> 7-stage canonical structure flow definition
+   - GET  /v1/agents/:id/knowledge -> Attached Title IDs and knowledge references
+   - POST /v1/agents/:id/simulate-flow -> Executes 7-step pipeline simulation with verification assertions and SHA-256 hash
+   - GET  /v1/tools -> Discoverable Tool Registry with risk levels and approval requirements
+   - GET  /v1/mcp -> Model Context Protocol server registry
+   - GET  /v1/knowledge -> Knowledge objects indexed by Title IDs
+   - GET  /v1/automations -> Automations engine with 9 lifecycle states
+   - POST /v1/automations/parse -> Natural-language automation parser with 5-point validation contract
+   - GET  /v1/executions -> Immutable execution audit logs with approval tokens and SHA-256 hashes
+   - GET  /v1/widget/config -> Customer service widget styling and settings
+   - POST /v1/widget/chat -> Customer service AI chat grounded in knowledge (@cf/meta/llama-3.3-70b-instruct)
+   - GET  /widget.js -> Static embeddable customer service script
+   - POST /api/coding/execute -> Cloudflare Workers AI coding engine producing AST patches and GitHub PRs
+
+6. DEPLOYMENT VERIFICATION CURL TESTS:
+   Once deployed, run these curl requests to confirm edge activation:
+   1. Health check:
+      curl -i "https://devai-controller.<your-subdomain>.workers.dev/api/health"
+   2. Verify 7-step flow simulation:
+      curl -i -X POST "https://devai-controller.<your-subdomain>.workers.dev/v1/agents/agent-general-01/simulate-flow" \
+        -H "Content-Type: application/json" \
+        -d '{"prompt": "Audit edge worker and prepare client briefing"}'
+   3. Verify Customer Service AI:
+      curl -i -X POST "https://devai-controller.<your-subdomain>.workers.dev/v1/widget/chat" \
+        -H "Content-Type: application/json" \
+        -d '{"message": "Hello, what are your service capabilities?"}'
+
+Confirm global zero-downtime deployment across Cloudflare's 330+ edge data centers.
+# --------------------------------------------------------------------------------
