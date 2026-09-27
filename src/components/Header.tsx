@@ -129,21 +129,8 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               </div>
 
-              <div className="pt-3 space-y-2 text-[11px] text-[#5c5a54]">
-                <div className="flex items-center justify-between">
-                  <span>Primary AI:</span>
-                  <span className="font-semibold text-[#111827]">Workers AI (Llama 3.3)</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Fallback AI:</span>
-                  <span className="font-semibold text-[#111827]">OpenAI (gpt-4o-mini)</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Token Vault:</span>
-                  <span className="font-mono text-orange-600 font-semibold text-[10px]">
-                    AES-256-GCM Server Isolated
-                  </span>
-                </div>
+              <div className="pt-3 text-[11px] text-[#5c5a54]">
+                Provider and security status is shown on the Services page after a live check.
               </div>
 
               <div className="pt-3 mt-3 border-t border-[#e7e5d8]/70 space-y-2">

@@ -1,8 +1,12 @@
 import crypto from 'crypto';
 import type { EncryptedTokenData, TokenProvider } from '../src/types/index.js';
+import { runtimeEnv } from './runtimeEnv.js';
 
-// Default worker secret key for encryption if not supplied in environment
-const DEFAULT_SECRET = process.env.WORKER_SECRET || 'operava-production-master-worker-secret-key-32b';
+function resolveSecret(secret?: string): string {
+  const value = secret || runtimeEnv('WORKER_SECRET');
+  if (!value) throw new Error('WORKER_SECRET is required for token encryption.');
+  return value;
+}
 
 /**
  * Derives a 32-byte cryptographic key using PBKDF2
@@ -14,7 +18,7 @@ function deriveKey(secret: string, salt: Buffer): Buffer {
 /**
  * Encrypts a plaintext string using AES-256-GCM
  */
-export function encryptToken(plaintext: string, secret: string = DEFAULT_SECRET): EncryptedTokenData {
+export function encryptToken(plaintext: string, secret?: string): EncryptedTokenData {
   if (!plaintext || typeof plaintext !== 'string') {
     throw new Error('Plaintext token must be a non-empty string');
   }
@@ -23,7 +27,7 @@ export function encryptToken(plaintext: string, secret: string = DEFAULT_SECRET)
   const salt = crypto.randomBytes(16);
   const iv = crypto.randomBytes(12);
 
-  const key = deriveKey(secret, salt);
+  const key = deriveKey(resolveSecret(secret), salt);
   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
 
   let ciphertext = cipher.update(plaintext, 'utf8', 'hex');
@@ -42,7 +46,7 @@ export function encryptToken(plaintext: string, secret: string = DEFAULT_SECRET)
 /**
  * Decrypts an AES-256-GCM encrypted payload back to plaintext
  */
-export function decryptToken(encrypted: EncryptedTokenData, secret: string = DEFAULT_SECRET): string {
+export function decryptToken(encrypted: EncryptedTokenData, secret?: string): string {
   if (!encrypted || !encrypted.ciphertext || !encrypted.iv || !encrypted.authTag || !encrypted.salt) {
     throw new Error('Invalid encrypted payload structure');
   }
@@ -51,7 +55,7 @@ export function decryptToken(encrypted: EncryptedTokenData, secret: string = DEF
   const iv = Buffer.from(encrypted.iv, 'hex');
   const authTag = Buffer.from(encrypted.authTag, 'hex');
 
-  const key = deriveKey(secret, salt);
+  const key = deriveKey(resolveSecret(secret), salt);
   const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
   decipher.setAuthTag(authTag);
 
