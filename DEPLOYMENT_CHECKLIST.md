@@ -16,8 +16,8 @@ Use this checklist with [DEPLOYMENT.md](DEPLOYMENT.md). Items describe the curre
 - [ ] Deployment target is the intended Cloudflare account.
 - [ ] Worker name is `devai-controller`.
 - [ ] Workers AI binding `AI` is present.
-- [ ] Cloudflare Email Service binding `EMAIL` is present and restricted to `noreply@internal.operavaglobal.com`.
-- [ ] `internal.operavaglobal.com` is onboarded for Cloudflare Email Sending.
+- [ ] Cloudflare Email Service binding `EMAIL` is present and restricted to `notification@app.jelvan.pro`.
+- [ ] `app.jelvan.pro` is onboarded for Cloudflare Email Sending.
 - [ ] Static assets are served from `./dist`.
 - [ ] API routes run through the Worker before SPA fallback.
 - [ ] `ADMIN_EMAIL` is configured as a Worker secret.

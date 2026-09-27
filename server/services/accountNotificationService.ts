@@ -1,15 +1,15 @@
 import { getAdminAuthConfig } from '../auth.js';
 import { createNotification } from './notificationsService.js';
-import { operavaEmailTemplate, sendTransactionalEmail } from './emailDeliveryService.js';
+import { devaiEmailTemplate, sendTransactionalEmail } from './emailDeliveryService.js';
 
 export type AccountNoticeKind = 'login_success' | 'login_failed' | 'otp_requested' | 'otp_verified' | 'account_action';
 
 const copy: Record<AccountNoticeKind, { subject: string; title: string; eyebrow: string }> = {
-  login_success: { subject: 'OPERAVA sign-in notice', title: 'Successful sign-in', eyebrow: 'Account security' },
-  login_failed: { subject: 'OPERAVA security alert', title: 'Unsuccessful sign-in attempt', eyebrow: 'Security alert' },
-  otp_requested: { subject: 'OPERAVA verification requested', title: 'Verification code requested', eyebrow: 'Account security' },
-  otp_verified: { subject: 'OPERAVA verification completed', title: 'Verification completed', eyebrow: 'Account security' },
-  account_action: { subject: 'OPERAVA account activity', title: 'Account action completed', eyebrow: 'Account activity' },
+  login_success: { subject: 'Dev’ai Controller sign-in notice', title: 'Successful sign-in', eyebrow: 'Account security' },
+  login_failed: { subject: 'Dev’ai Controller security alert', title: 'Unsuccessful sign-in attempt', eyebrow: 'Security alert' },
+  otp_requested: { subject: 'Dev’ai Controller verification requested', title: 'Verification code requested', eyebrow: 'Account security' },
+  otp_verified: { subject: 'Dev’ai Controller verification completed', title: 'Verification completed', eyebrow: 'Account security' },
+  account_action: { subject: 'Dev’ai Controller account activity', title: 'Account action completed', eyebrow: 'Account activity' },
 };
 
 export async function notifyAdminAccountEvent(kind: AccountNoticeKind, message: string, metadata: Record<string, string | number | boolean> = {}) {
