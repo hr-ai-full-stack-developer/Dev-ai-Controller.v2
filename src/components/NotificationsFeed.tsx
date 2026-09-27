@@ -123,6 +123,12 @@ export const NotificationsFeed: React.FC<NotificationsFeedProps> = ({
                 <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6] leading-relaxed">
                   {notif.message}
                 </p>
+                {(notif.actor || notif.repository) && (
+                  <div className="flex flex-wrap gap-2 text-[10px] text-[#80868b]">
+                    {notif.actor && <span>By {notif.actor}</span>}
+                    {notif.repository && <span>Repository: {notif.repository}</span>}
+                  </div>
+                )}
 
                 <div className="flex items-center space-x-4 pt-1 text-[11px] text-[#5f6368] dark:text-[#9aa0a6]">
                   <div className="flex items-center space-x-1">
@@ -141,7 +147,7 @@ export const NotificationsFeed: React.FC<NotificationsFeedProps> = ({
               <div className="flex items-center space-x-2 shrink-0 self-start sm:self-center">
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                  {notif.status}
+                  {notif.status === 'acknowledged' ? 'Recorded' : notif.status}
                 </span>
 
                 {notif.linkUrl && (

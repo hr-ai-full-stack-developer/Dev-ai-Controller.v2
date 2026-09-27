@@ -69,13 +69,17 @@ export interface DeployedApp {
 export interface NotificationItem {
   id: string;
   service: 'resend' | 'cloudflare' | 'github' | 'supabase' | 'system';
-  type: 'email_sent' | 'deployment_success' | 'deployment_failed' | 'pr_opened' | 'security_alert' | 'agent_task';
+  type: 'email_sent' | 'deployment_success' | 'deployment_failed' | 'pr_opened' | 'security_alert' | 'agent_task' | 'push' | 'pull_request' | 'issue' | 'release' | 'repository' | 'provider_event';
   title: string;
   message: string;
   timestamp: string;
   status: 'delivered' | 'sent' | 'queued' | 'acknowledged' | 'failed';
   recipient?: string;
   linkUrl?: string;
+  sourceId?: string;
+  actor?: string;
+  repository?: string;
+  metadata?: Record<string, string | number | boolean>;
 }
 
 export interface CodingFileChange {
