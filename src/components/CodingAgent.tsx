@@ -178,7 +178,7 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
                     <p className="text-xs font-medium text-[#1a1d24] dark:text-[#f0f3f6] line-clamp-2">
                       {task.prompt}
                     </p>
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 ml-2" />
+                    {task.status === 'completed' ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 ml-2" /> : <Clock className="h-4 w-4 text-amber-500 shrink-0 ml-2" />}
                   </div>
                   <div className="mt-2 flex items-center justify-between text-[10px] text-[#5f6368] dark:text-[#9aa0a6]">
                     <span className="font-mono">{task.branch}</span>
@@ -247,11 +247,11 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
                   <span>{activeTask.validationResults.output}</span>
                 </div>
                 <div className="flex space-x-2">
-                  <span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 text-[10px] font-mono">
-                    Lint: Passed
+                  <span className="px-2 py-0.5 rounded bg-[#f0f2f5] dark:bg-[#202530] text-[10px] font-mono">
+                    Lint: {activeTask.validationResults.lintPassed ? 'Passed' : 'Not run'}
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 text-[10px] font-mono">
-                    Build: Verified
+                  <span className="px-2 py-0.5 rounded bg-[#f0f2f5] dark:bg-[#202530] text-[10px] font-mono">
+                    Build: {activeTask.validationResults.buildPassed ? 'Passed' : 'Not run'}
                   </span>
                 </div>
               </div>
