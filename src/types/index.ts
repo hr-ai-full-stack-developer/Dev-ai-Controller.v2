@@ -68,7 +68,7 @@ export interface DeployedApp {
 
 export interface NotificationItem {
   id: string;
-  service: 'resend' | 'cloudflare' | 'github' | 'supabase' | 'system';
+  service: 'cloudflare' | 'github' | 'supabase' | 'system';
   type: 'email_sent' | 'deployment_success' | 'deployment_failed' | 'pr_opened' | 'security_alert' | 'agent_task' | 'push' | 'pull_request' | 'issue' | 'release' | 'repository' | 'provider_event';
   title: string;
   message: string;
@@ -346,7 +346,7 @@ export interface ToolDefinition {
   toolId: string;
   name: string;
   description: string;
-  provider: 'native' | 'mcp' | 'github' | 'resend' | 'cloudflare' | 'figma';
+  provider: 'native' | 'mcp' | 'github' | 'cloudflare' | 'figma';
   mcpServerId?: string;
   inputSchema: Record<string, any>;
   outputSchema?: Record<string, any>;
@@ -534,7 +534,7 @@ export interface AgentMemoryRecord {
 
 export interface AgentCapability {
   id: string;
-  provider: 'supabase' | 'github' | 'cloudflare' | 'resend' | 'native';
+  provider: 'supabase' | 'github' | 'cloudflare' | 'native';
   transport: 'api' | 'mcp' | 'native';
   operations: Array<'read' | 'write' | 'execute'>;
   configured: boolean;
