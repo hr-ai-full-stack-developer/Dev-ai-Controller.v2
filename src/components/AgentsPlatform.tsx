@@ -63,7 +63,7 @@ export const AgentsPlatform: React.FC = () => {
     {
       role: 'assistant',
       agentName: 'General Agent',
-      text: 'Welcome to the General AI Agent Platform. I can retrieve authorized knowledge, invoke MCP tools across GitHub, Figma, Resend, and Cloudflare, coordinate with specialized sub-agents, or formulate deterministic scheduled automations.',
+      text: 'Welcome to the Agents. I can retrieve authorized knowledge, invoke MCP tools across GitHub, Figma, Resend, and Cloudflare, coordinate with specialized sub-agents, or formulate deterministic scheduled automations.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -375,7 +375,7 @@ export const AgentsPlatform: React.FC = () => {
                 General AI Agent Platform
               </h1>
               <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6]">
-                Cloudflare Workers AI • Multi-Agent Orchestration • MCP Registry • Consequential Action Approvals
+                Build, connect, and run agents from one workspace.
               </p>
             </div>
           </div>
@@ -392,7 +392,7 @@ export const AgentsPlatform: React.FC = () => {
             }`}
           >
             <Workflow className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-            <span>Knowledge & Structure Flows</span>
+            <span>Flows</span>
             <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-mono">
               6
             </span>
@@ -407,7 +407,7 @@ export const AgentsPlatform: React.FC = () => {
             }`}
           >
             <Zap className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-            <span>Automations Engine</span>
+            <span>Automations</span>
             <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-mono">
               {automations.length}
             </span>
@@ -422,7 +422,7 @@ export const AgentsPlatform: React.FC = () => {
             }`}
           >
             <Sparkles className="h-3.5 w-3.5 text-orange-500" />
-            <span>Chat & Multi-Agent</span>
+            <span>Chat</span>
           </button>
 
           <button
@@ -434,7 +434,7 @@ export const AgentsPlatform: React.FC = () => {
             }`}
           >
             <Layers className="h-3.5 w-3.5 text-emerald-500" />
-            <span>Agent Worker & Architecture</span>
+            <span>System</span>
           </button>
         </div>
       </div>
@@ -450,10 +450,10 @@ export const AgentsPlatform: React.FC = () => {
               <div>
                 <h2 className="text-sm font-bold text-[#1a1d24] dark:text-[#f0f3f6] flex items-center space-x-2">
                   <Zap className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  <span>Natural-Language Automation Creator</span>
+                  <span>Create automation</span>
                 </h2>
                 <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6] mt-0.5">
-                  State full intent in plain English (e.g. "Send monthly client update on 31 at 09:00 with executive email template"). The AI identifies missing constraints before requesting approval.
+                  Describe what should happen and review the generated automation before approval.
                 </p>
               </div>
 
