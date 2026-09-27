@@ -124,20 +124,17 @@ test('OPERAVA transactional template escapes content and renders verification co
   assert.match(html, /Confirm &lt;access&gt;/);
 });
 
-test('transactional email falls back to Cloudflare binding when Resend is unavailable', async () => {
-  const { setWorkerEnv } = await import('../server/runtimeEnv.js');
-  const { setCloudflareEmailBinding, sendTransactionalEmail } = await import('../server/services/emailDeliveryService.js');
+test('transactional email uses only the restricted OPERAVA Cloudflare sender', async () => {
+  const { setCloudflareEmailBinding, sendTransactionalEmail, OPERAVA_EMAIL_FROM } = await import('../server/services/emailDeliveryService.js');
   let captured: any = null;
-  setWorkerEnv({ EMAIL_FROM: 'OPERAVA <noreply@example.test>' });
   setCloudflareEmailBinding({ send: async (message: any) => { captured = message; return { messageId: 'cf-test-1' }; } });
   try {
-    const result = await sendTransactionalEmail({ to: 'admin@example.test', subject: 'Test', text: 'Hello', html: '<p>Hello</p>' });
+    const result = await sendTransactionalEmail({ to: 'admin@example.test', from: 'spoof@example.test', subject: 'Test', text: 'Hello', html: '<p>Hello</p>' });
     assert.equal(result.provider, 'cloudflare-email');
-    assert.equal(result.fallbackUsed, true);
     assert.equal(result.id, 'cf-test-1');
-    assert.equal(captured.from, 'OPERAVA <noreply@example.test>');
+    assert.equal(captured.from, OPERAVA_EMAIL_FROM);
+    assert.equal(captured.from, 'Operava <noreply@internal.operavaglobal.com>');
   } finally {
     setCloudflareEmailBinding(null);
-    setWorkerEnv(null);
   }
 });
