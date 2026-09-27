@@ -24,16 +24,10 @@ export async function sendResendEmail(token: string, params: SendEmailParams): P
   }
 
   const toList = Array.isArray(params.to) ? params.to : [params.to];
-  const fromAddress = params.from || 'Cloudflare Hub <notifications@resend.dev>';
-  const subject = params.subject || 'Cloudflare Agent Hub Notification';
-  const html =
-    params.html ||
-    `<div style="font-family:sans-serif;padding:24px;border-radius:12px;background:#0d1117;color:#f0f6fc;">
-      <h2 style="color:#f38020;margin-bottom:12px;">Cloudflare Agent Hub Notification</h2>
-      <p style="font-size:14px;line-height:1.6;">${params.text || 'This alert was dispatched from the Cloudflare Agent Hub.'}</p>
-      <hr style="border:none;border-top:1px solid #30363d;margin:20px 0;"/>
-      <small style="color:#8b949e;">Powered by Cloudflare Workers AI & Resend</small>
-    </div>`;
+  if (!params.from) throw new Error('A verified sender address is required');
+  const fromAddress = params.from;
+  const subject = params.subject;
+  const html = params.html;
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
