@@ -145,7 +145,7 @@ export async function testGitHubToken(
         valid: true,
         user: user.login,
         scopes,
-        message: `Authenticated as @${user.login} (${user.public_repos} repos, scopes: ${scopes.join(', ') || 'repo'})`,
+        message: `Authenticated as @${user.login}${scopes.length ? ` (reported OAuth scopes: ${scopes.join(', ')})` : ''}`,
       };
     }
 
