@@ -63,7 +63,7 @@ test('health reports configuration truthfully without claiming optional provider
   const body = await r.json();
   assert.equal(body.adminConfigured, true);
   assert.equal(body.integrations.github, false);
-  assert.equal(body.integrations.resend, false);
+  assert.equal(body.integrations.cloudflareEmail, true);
   assert.equal(body.integrations.supabase, false);
   assert.equal(body.integrations.openaiFallback, false);
   assert.equal(typeof body.database, 'undefined');
