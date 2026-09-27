@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api.js';
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
@@ -52,6 +53,7 @@ import type {
 
 export const AgentsPlatform: React.FC = () => {
   // Navigation tabs within AGENTS
+  const [actionError, setActionError] = useState<string | null>(null);
   const [activeSubTab, setActiveSubTab] = useState<'chat' | 'automations' | 'architecture' | 'flows'>('flows');
 
   // Agent Chat State
@@ -112,13 +114,13 @@ export const AgentsPlatform: React.FC = () => {
     setIsLoadingAutomations(true);
     try {
       const [agentsRes, toolsRes, mcpRes, knowRes, autoRes, logsRes, widgetRes] = await Promise.all([
-        fetch('/v1/agents').then((r) => r.json()).catch(() => ({ agents: [] })),
-        fetch('/v1/tools').then((r) => r.json()).catch(() => ({ tools: [] })),
-        fetch('/v1/mcp').then((r) => r.json()).catch(() => ({ mcpServers: [] })),
-        fetch('/v1/knowledge').then((r) => r.json()).catch(() => ({ items: [] })),
-        fetch('/v1/automations').then((r) => r.json()).catch(() => ({ automations: [] })),
-        fetch('/v1/executions').then((r) => r.json()).catch(() => ({ logs: [] })),
-        fetch('/v1/widget/config').then((r) => r.json()).catch(() => ({ config: null })),
+        apiFetch('/v1/agents').then((r) => r.json()).catch(() => ({ agents: [] })),
+        apiFetch('/v1/tools').then((r) => r.json()).catch(() => ({ tools: [] })),
+        apiFetch('/v1/mcp').then((r) => r.json()).catch(() => ({ mcpServers: [] })),
+        apiFetch('/v1/knowledge').then((r) => r.json()).catch(() => ({ items: [] })),
+        apiFetch('/v1/automations').then((r) => r.json()).catch(() => ({ automations: [] })),
+        apiFetch('/v1/executions').then((r) => r.json()).catch(() => ({ logs: [] })),
+        apiFetch('/v1/widget/config').then((r) => r.json()).catch(() => ({ config: null })),
       ]);
 
       if (agentsRes.agents) setAgents(agentsRes.agents);
@@ -188,7 +190,7 @@ export const AgentsPlatform: React.FC = () => {
       }
 
       // Default AI completion
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -228,7 +230,7 @@ export const AgentsPlatform: React.FC = () => {
     setMissingQuestions([]);
 
     try {
-      const res = await fetch('/v1/automations/parse', {
+      const res = await apiFetch('/v1/automations/parse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: naturalLanguagePrompt }),
@@ -250,7 +252,7 @@ export const AgentsPlatform: React.FC = () => {
   const handleApprove = async (automationId: string) => {
     setIsProcessingApproval(true);
     try {
-      const res = await fetch(`/v1/automations/${automationId}/approve`, {
+      const res = await apiFetch(`/v1/automations/${automationId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -262,11 +264,11 @@ export const AgentsPlatform: React.FC = () => {
         setSelectedAutomation(data.automation);
         setApprovalModalAutomation(null);
         // Refresh logs
-        const logsRes = await fetch('/v1/executions').then((r) => r.json());
+        const logsRes = await apiFetch('/v1/executions').then((r) => r.json());
         if (logsRes.logs) setExecutionLogs(logsRes.logs);
       }
     } catch (err) {
-      console.error('Approval failed:', err);
+      setActionError(err instanceof Error ? err.message : 'The request could not be completed.');
     } finally {
       setIsProcessingApproval(false);
     }
@@ -276,7 +278,7 @@ export const AgentsPlatform: React.FC = () => {
   const handleCancel = async (automationId: string) => {
     setIsProcessingApproval(true);
     try {
-      const res = await fetch(`/v1/automations/${automationId}/cancel`, {
+      const res = await apiFetch(`/v1/automations/${automationId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -289,7 +291,7 @@ export const AgentsPlatform: React.FC = () => {
         setApprovalModalAutomation(null);
       }
     } catch (err) {
-      console.error('Cancel failed:', err);
+      setActionError(err instanceof Error ? err.message : 'The request could not be completed.');
     } finally {
       setIsProcessingApproval(false);
     }
@@ -298,15 +300,15 @@ export const AgentsPlatform: React.FC = () => {
   // Trigger Immediate Run
   const handleRunNow = async (automationId: string) => {
     try {
-      const res = await fetch(`/v1/automations/${automationId}/run`, {
+      const res = await apiFetch(`/v1/automations/${automationId}/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
       const data = await res.json();
       if (data.success) {
         const [autoRes, logsRes] = await Promise.all([
-          fetch('/v1/automations').then((r) => r.json()),
-          fetch('/v1/executions').then((r) => r.json()),
+          apiFetch('/v1/automations').then((r) => r.json()),
+          apiFetch('/v1/executions').then((r) => r.json()),
         ]);
         if (autoRes.automations) setAutomations(autoRes.automations);
         if (logsRes.logs) {
@@ -315,7 +317,7 @@ export const AgentsPlatform: React.FC = () => {
         }
       }
     } catch (err) {
-      console.error('Run now failed:', err);
+      setActionError(err instanceof Error ? err.message : 'The request could not be completed.');
     }
   };
 
@@ -360,6 +362,7 @@ export const AgentsPlatform: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {actionError && <div role="alert" className="p-3 rounded-xl bg-red-50 text-red-800 text-sm">{actionError}<button className="ml-3 underline" onClick={() => setActionError(null)}>Dismiss</button></div>}
       {/* Top Header & Sub-Navigation */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e2e4e9] dark:border-[#252a35] pb-4">
         <div>

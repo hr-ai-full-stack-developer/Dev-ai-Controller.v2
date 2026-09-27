@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api.js';
 import React, { useState, useEffect } from 'react';
 import {
   ArrowRight,
@@ -18,29 +19,20 @@ const defaultUser: SupabaseAuthUser = {
   id: 'usr-sb-7782194',
   email: 'admin@operava.com',
   name: 'Alex Rivera',
-  role: 'Admin • People',
+  role: 'Developer / Operator',
   sessionValid: true,
   lastSignInAt: new Date().toISOString(),
 };
 
 export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return !!localStorage.getItem('admin_token');
-    }
-    return true;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [currentUser, setCurrentUser] = useState<SupabaseAuthUser>(defaultUser);
-  const [token, setToken] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('admin_token');
-    }
-    return null;
-  });
+  const [token, setToken] = useState<string | null>(null);
 
   // Login form state (100% strictly aligned with Loginpage_mandatory_design.html)
-  const [email, setEmail] = useState('admin@operava.com');
-  const [password, setPassword] = useState('DevaiAdmin2026!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -54,25 +46,14 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
   const [resetSent, setResetSent] = useState(false);
   const [resetError, setResetError] = useState('');
 
-  // Verify active session on mount
   useEffect(() => {
-    const savedToken = localStorage.getItem('admin_token');
-    if (savedToken) {
-      setToken(savedToken);
-      setIsAuthenticated(true);
-      fetch('/api/auth/verify-session', {
-        headers: { Authorization: `Bearer ${savedToken}` },
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          if (data && data.user) {
-            setCurrentUser(data.user);
-          }
-        })
-        .catch(() => {
-          // Keep active session in preview
-        });
-    }
+    localStorage.removeItem('admin_token');
+    const expire = () => { setIsAuthenticated(false); setToken(null); };
+    window.addEventListener('devai:session-expired', expire);
+    apiFetch('/api/auth/verify-session')
+      .then(r => r.json()).then(data => { setCurrentUser(data.user); setIsAuthenticated(true); })
+      .catch(() => setIsAuthenticated(false)).finally(() => setIsCheckingSession(false));
+    return () => window.removeEventListener('devai:session-expired', expire);
   }, []);
 
   const validateForm = () => {
@@ -97,63 +78,39 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, rememberMe }),
       });
       const data = await res.json();
-      const activeToken = data.token || 'operava-operator-session';
-      const user = data.user || {
-        ...defaultUser,
-        email,
-      };
-
-      if (rememberMe) {
-        localStorage.setItem('admin_token', activeToken);
-      }
-      setToken(activeToken);
-      setCurrentUser(user);
-      setToastMessage('Welcome to OPERAVA');
-
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setIsAuthenticated(true);
-        setTimeout(() => setToastMessage(null), 2500);
-      }, 700);
-    } catch (err) {
-      const fallbackToken = 'operava-operator-session';
-      localStorage.setItem('admin_token', fallbackToken);
-      setToken(fallbackToken);
+      setCurrentUser(data.user);
       setIsAuthenticated(true);
+      setPassword('');
+    } catch (err) {
+      setErrors({ password: err instanceof Error ? err.message : 'Unable to sign in. Please try again.' });
+    } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleResetSubmit = (e: React.FormEvent) => {
+  const handleResetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetEmail)) {
-      setResetError('Enter a valid email');
-      return;
+      setResetError('Enter a valid email'); return;
     }
-    setResetError('');
-    setIsResetting(true);
-    setTimeout(() => {
-      setIsResetting(false);
+    setResetError(''); setIsResetting(true);
+    try {
+      await apiFetch('/api/auth/reset-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: resetEmail }) });
       setResetSent(true);
-      setTimeout(() => {
-        setShowResetModal(false);
-        setResetSent(false);
-        setResetEmail('');
-        setToastMessage('Reset link sent to your inbox');
-        setTimeout(() => setToastMessage(null), 3000);
-      }, 1600);
-    }, 900);
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : 'Unable to request a password reset.');
+    } finally { setIsResetting(false); }
   };
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await apiFetch('/api/auth/logout', { method: 'POST' });
     } catch (err) {
       // ignore
     }
@@ -161,6 +118,8 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
     setToken(null);
     setIsAuthenticated(false);
   };
+
+  if (isCheckingSession) return <div className="min-h-screen grid place-items-center bg-[#f8f5e9]" role="status">Checking your session…</div>;
 
   // If authenticated, render protected dashboard within context
   if (isAuthenticated) {

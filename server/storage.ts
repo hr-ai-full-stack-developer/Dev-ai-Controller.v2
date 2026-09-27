@@ -131,17 +131,16 @@ function initDefaultChatSessions() {
   }
 }
 
-initDefaultChatSessions();
 
 // Optional Supabase client if configured
 let supabaseClient: SupabaseClient | null = null;
 
 function getSupabase(): SupabaseClient | null {
-  if (!supabaseClient && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+  if (!supabaseClient && process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY)) {
     try {
       supabaseClient = createClient(
         process.env.SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_KEY,
+        (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY)!,
         { auth: { persistSession: false } }
       );
     } catch (err) {
@@ -180,7 +179,7 @@ function initializeSeedData() {
     {
       name: 'Supabase Service Role Key',
       provider: 'supabase',
-      rawToken: process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY,
+      rawToken: process.env.SUPABASE_SERVICE_ROLE_KEY || (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY)!,
       metadata: { baseUrl: process.env.SUPABASE_URL },
     },
     {
@@ -225,7 +224,10 @@ function initializeSeedData() {
 }
 
 // Run initial seed
-initializeSeedData();
+let initialized = false;
+export function ensureStorageInitialized() {
+  if (!initialized) { initializeSeedData(); initialized = true; }
+}
 
 /**
  * Returns sanitized tokens safe for frontend display

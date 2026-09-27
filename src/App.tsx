@@ -1,3 +1,4 @@
+import { apiFetch } from './lib/api.js';
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header.js';
 import { Sidebar } from './components/Sidebar.js';
@@ -14,7 +15,6 @@ import { KnowledgeCenter } from './components/KnowledgeCenter.js';
 import { WorkerAgent } from './components/WorkerAgent.js';
 import { AgentsPlatform } from './components/AgentsPlatform.js';
 import { BreadcrumbNav } from './components/BreadcrumbNav.js';
-import { AdminProtectiveWrapper } from './components/AdminProtectiveWrapper.js';
 import type {
   ServiceStatusInfo,
   ServiceType,
@@ -26,6 +26,12 @@ import type {
 } from './types/index.js';
 
 export default function App() {
+  const [actionError, setActionError] = useState<string | null>(null);
+  useEffect(() => {
+    const onError = (event: Event) => setActionError((event as CustomEvent<string>).detail);
+    window.addEventListener('devai:api-error', onError);
+    return () => window.removeEventListener('devai:api-error', onError);
+  }, []);
   const [activeTab, setActiveTab] = useState<string>('agents');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedChatSessionId, setSelectedChatSessionId] = useState<string | null>(null);
@@ -46,7 +52,7 @@ export default function App() {
       id: 'cloudflare',
       name: 'Cloudflare',
       role: 'Primary Runtime, Edge APIs & Cloudflare AI',
-      status: 'operational',
+      status: 'offline',
       latencyMs: 22,
       lastChecked: new Date().toISOString(),
       version: 'Workers v2026.3',
@@ -57,7 +63,7 @@ export default function App() {
       id: 'supabase',
       name: 'Supabase',
       role: 'Authentication & Central Database',
-      status: 'operational',
+      status: 'offline',
       latencyMs: 27,
       lastChecked: new Date().toISOString(),
       version: 'PostgreSQL 15.6',
@@ -68,7 +74,7 @@ export default function App() {
       id: 'github',
       name: 'GitHub',
       role: 'Source Code, Commits & PR Automation',
-      status: 'operational',
+      status: 'offline',
       latencyMs: 38,
       lastChecked: new Date().toISOString(),
       version: 'REST API v3',
@@ -79,7 +85,7 @@ export default function App() {
       id: 'resend',
       name: 'Resend',
       role: 'Transactional Email & Notifications',
-      status: 'operational',
+      status: 'offline',
       latencyMs: 34,
       lastChecked: new Date().toISOString(),
       version: 'Resend API v1',
@@ -90,7 +96,7 @@ export default function App() {
       id: 'openai',
       name: 'OpenAI (Fallback)',
       role: 'Secondary / Fallback AI Provider',
-      status: 'standby',
+      status: 'offline',
       latencyMs: 44,
       lastChecked: new Date().toISOString(),
       version: 'gpt-4o-mini',
@@ -152,7 +158,7 @@ export default function App() {
   const fetchStatus = async () => {
     setIsRefreshingStatus(true);
     try {
-      const res = await fetch('/api/status');
+      const res = await apiFetch('/api/status');
       const data = await res.json();
       if (data.success && data.services) {
         setServices(data.services);
@@ -170,20 +176,20 @@ export default function App() {
   // Fetch Deployments
   const fetchDeployments = async () => {
     try {
-      const res = await fetch('/api/deployments');
+      const res = await apiFetch('/api/deployments');
       const data = await res.json();
       if (data.success && data.deployments) {
         setDeployments(data.deployments);
       }
     } catch (err) {
-      console.warn('Failed to fetch deployments:', err);
+      setActionError(err instanceof Error ? err.message : 'Unable to load deployments.');
     }
   };
 
   // Fetch Notifications
   const fetchNotifications = async () => {
     try {
-      const res = await fetch('/api/notifications');
+      const res = await apiFetch('/api/notifications');
       const data = await res.json();
       if (data.success && data.notifications) {
         setNotifications(data.notifications);
@@ -196,7 +202,7 @@ export default function App() {
   // Fetch Coding Tasks
   const fetchCodingTasks = async () => {
     try {
-      const res = await fetch('/api/coding/tasks');
+      const res = await apiFetch('/api/coding/tasks');
       const data = await res.json();
       if (data.success && data.tasks) {
         setCodingTasks(data.tasks);
@@ -209,7 +215,7 @@ export default function App() {
   // Fetch Logs
   const fetchLogs = async () => {
     try {
-      const res = await fetch('/api/logs');
+      const res = await apiFetch('/api/logs');
       const data = await res.json();
       if (data.success && data.logs) {
         setLogs(data.logs);
@@ -223,7 +229,7 @@ export default function App() {
   const fetchAuthUser = async () => {
     try {
       const token = localStorage.getItem('admin_token');
-      const res = await fetch('/api/auth/me', {
+      const res = await apiFetch('/api/auth/me', {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
@@ -247,9 +253,10 @@ export default function App() {
 
   // Trigger Deployment
   const handleTriggerDeploy = async (appId: string) => {
+    setActionError(null);
     setIsDeploying(true);
     try {
-      const res = await fetch('/api/deployments/trigger', {
+      const res = await apiFetch('/api/deployments/trigger', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ appId, user: currentUser.email }),
@@ -261,7 +268,7 @@ export default function App() {
         await fetchNotifications();
       }
     } catch (err) {
-      console.error('Trigger deployment failed:', err);
+      setActionError(err instanceof Error ? err.message : 'Deployment failed.');
     } finally {
       setIsDeploying(false);
     }
@@ -269,9 +276,10 @@ export default function App() {
 
   // Rollback Deployment
   const handleRollbackDeploy = async (appId: string) => {
+    setActionError(null);
     setIsDeploying(true);
     try {
-      const res = await fetch('/api/deployments/rollback', {
+      const res = await apiFetch('/api/deployments/rollback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ appId, user: currentUser.email }),
@@ -283,7 +291,7 @@ export default function App() {
         await fetchNotifications();
       }
     } catch (err) {
-      console.error('Rollback deployment failed:', err);
+      setActionError(err instanceof Error ? err.message : 'Rollback failed.');
     } finally {
       setIsDeploying(false);
     }
@@ -291,9 +299,10 @@ export default function App() {
 
   // Execute Coding Agent Task
   const handleExecuteCodingTask = async (prompt: string, repo: string, branch: string) => {
+    setActionError(null);
     setIsExecutingCodeTask(true);
     try {
-      const res = await fetch('/api/coding/execute', {
+      const res = await apiFetch('/api/coding/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, repo, branch, user: currentUser.email }),
@@ -305,15 +314,16 @@ export default function App() {
         await fetchLogs();
       }
     } catch (err) {
-      console.error('Coding task execution failed:', err);
+      setActionError(err instanceof Error ? err.message : 'Coding request failed.');
     } finally {
       setIsExecutingCodeTask(false);
     }
   };
 
   return (
-    <AdminProtectiveWrapper>
+
       <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0f1117] text-[#1a1d24] dark:text-[#f0f3f6] flex flex-col antialiased">
+        {actionError && <div role="alert" className="fixed bottom-4 left-4 right-4 z-[10000] rounded-xl border border-red-200 shadow-lg bg-red-50 text-red-800 px-4 py-3 flex justify-between"><span>{actionError}</span><button onClick={() => setActionError(null)} aria-label="Dismiss error">×</button></div>}
         {/* Top Header */}
         <Header
           activeTab={activeTab}
@@ -392,7 +402,7 @@ export default function App() {
                   }}
                   onCreateNewChat={async () => {
                     try {
-                      const res = await fetch('/api/chat/sessions', {
+                      const res = await apiFetch('/api/chat/sessions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ title: 'Fresh Chat' }),
@@ -443,6 +453,6 @@ export default function App() {
           </main>
         </div>
       </div>
-    </AdminProtectiveWrapper>
+
   );
 }

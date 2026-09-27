@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api.js';
 import React, { useState } from 'react';
 import {
   PanelLeft,
@@ -40,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleRefreshSession = async () => {
     try {
-      const res = await fetch('/api/auth/me');
+      const res = await apiFetch('/api/auth/me');
       const data = await res.json();
       if (data.success && data.user && onUserUpdate) {
         onUserUpdate(data.user);
@@ -48,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
       setRefreshNotification('Session verified active.');
       setTimeout(() => setRefreshNotification(null), 2000);
     } catch (e) {
-      setRefreshNotification('Session verified.');
+      setRefreshNotification('Unable to verify the session. Please sign in again.');
       setTimeout(() => setRefreshNotification(null), 2000);
     }
   };

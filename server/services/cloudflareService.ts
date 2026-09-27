@@ -4,8 +4,8 @@ export async function testCloudflareConnection(token?: string, accountId?: strin
 
   if (!cfToken || cfToken.includes('Demo') || !cfAccount) {
     return {
-      valid: true,
-      message: 'Cloudflare Workers AI (Llama 3.1 8B Instruct) binding verified & ready',
+      valid: false,
+      message: 'Cloudflare API access is not configured',
       model: '@cf/meta/llama-3.1-8b-instruct',
     };
   }

@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api.js';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Sparkles,
@@ -132,7 +133,7 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
   // Fetch all sessions
   const loadSessions = async () => {
     try {
-      const res = await fetch('/api/chat/sessions');
+      const res = await apiFetch('/api/chat/sessions');
       const data = await res.json();
       if (data.success && data.sessions) {
         setSessions(data.sessions);
@@ -151,7 +152,7 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
   // Select and load a specific session
   const selectSession = async (sessionId: string) => {
     try {
-      const res = await fetch(`/api/chat/sessions/${sessionId}`);
+      const res = await apiFetch(`/api/chat/sessions/${sessionId}`);
       const data = await res.json();
       if (data.success) {
         setCurrentSession(data.session);
@@ -168,7 +169,7 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
   const handleCreateNewChat = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/chat/sessions', {
+      const res = await apiFetch('/api/chat/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -194,7 +195,7 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
   const handleClearChat = async () => {
     if (!currentSession) return;
     try {
-      await fetch(`/api/chat/sessions/${currentSession.id}/clear`, { method: 'POST' });
+      await apiFetch(`/api/chat/sessions/${currentSession.id}/clear`, { method: 'POST' });
       setMessages([]);
       setCurrentSession((prev) =>
         prev ? { ...prev, messageCount: 0, lastMessageSnippet: 'Session cleared.' } : null
@@ -236,7 +237,7 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
     let sessionId = currentSession?.id;
     if (!sessionId) {
       try {
-        const createRes = await fetch('/api/chat/sessions', {
+        const createRes = await apiFetch('/api/chat/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: promptText.slice(0, 36) }),
@@ -267,7 +268,7 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
     setIsLoading(true);
 
     try {
-      const res = await fetch(`/api/chat/sessions/${sessionId}/messages`, {
+      const res = await apiFetch(`/api/chat/sessions/${sessionId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: promptText }),

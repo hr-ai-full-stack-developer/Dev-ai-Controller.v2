@@ -5,15 +5,7 @@ export async function testSupabaseConnection(url?: string, key?: string): Promis
   const sbKey = key || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
 
   if (!sbUrl || !sbKey || sbKey.includes('Demo')) {
-    return {
-      valid: true,
-      message: 'Supabase connection verified (Schema ready: api_tokens, logs tables mapped with RLS policies)',
-      details: {
-        mode: 'preview_sandbox',
-        tables: ['api_tokens', 'logs'],
-        rlsEnforced: true,
-      },
-    };
+    return { valid: false, message: 'Supabase connection is not configured.' };
   }
 
   try {
@@ -23,8 +15,8 @@ export async function testSupabaseConnection(url?: string, key?: string): Promis
     if (error) {
       // Table might not exist yet, check basic connection
       return {
-        valid: true,
-        message: `Connected to Supabase endpoint (${sbUrl}). Tables can be initialized via schema.sql`,
+        valid: false,
+        message: 'Supabase could not read the required table',
         details: { error: error.message },
       };
     }

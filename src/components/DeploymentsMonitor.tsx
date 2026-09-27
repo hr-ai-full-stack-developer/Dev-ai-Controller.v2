@@ -150,7 +150,7 @@ export const DeploymentsMonitor: React.FC<DeploymentsMonitorProps> = ({
 
               {/* Action Buttons */}
               <div className="flex items-center space-x-2 shrink-0 self-start lg:self-center">
-                <a
+                {app.url && <a
                   href={app.url}
                   target="_blank"
                   rel="noreferrer"
@@ -159,7 +159,7 @@ export const DeploymentsMonitor: React.FC<DeploymentsMonitorProps> = ({
                   <Globe className="h-3.5 w-3.5 text-purple-500" />
                   <span>Visit Live</span>
                   <ExternalLink className="h-3 w-3 opacity-60" />
-                </a>
+                </a>}
 
                 <button
                   onClick={() => handleDeploy(app.id)}
@@ -167,7 +167,7 @@ export const DeploymentsMonitor: React.FC<DeploymentsMonitorProps> = ({
                   className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-colors border border-purple-200 dark:border-purple-800 cursor-pointer disabled:opacity-50"
                 >
                   <Play className={`h-3.5 w-3.5 ${activeActionId === app.id ? 'animate-spin' : ''}`} />
-                  <span>Redeploy</span>
+                  <span>Deploy latest uploaded version</span>
                 </button>
 
                 <button

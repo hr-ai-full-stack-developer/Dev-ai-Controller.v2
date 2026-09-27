@@ -30,11 +30,6 @@ export async function getServicesStatus(): Promise<{
     lastChecked: timestamp,
     version: 'Workers v2026.3',
     details: cfRes.message || 'Workers runtime, request routing, and Cloudflare AI healthy.',
-    metrics: {
-      'Workers AI Model': '@cf/meta/llama-3.3-70b',
-      'Edge PoPs': '330+ locations',
-      'Secrets Secured': 5,
-    },
     features: ['Serverless Runtime', 'Cloudflare Workers AI', 'Request Routing', 'Zero-Trust Secrets'],
   };
 
@@ -51,11 +46,6 @@ export async function getServicesStatus(): Promise<{
     lastChecked: timestamp,
     version: 'PostgreSQL 15.6',
     details: sbRes.message || 'Supabase Auth session validator and PostgreSQL database connected with RLS policies.',
-    metrics: {
-      'Auth Sessions': 'Active',
-      'RLS Tables': 6,
-      'Connection Pool': 'pgBouncer 5432',
-    },
     features: ['Supabase Auth', 'PostgreSQL Database', 'Row Level Security', 'Audit Trail Storage'],
   };
 
@@ -67,18 +57,13 @@ export async function getServicesStatus(): Promise<{
     id: 'github',
     name: 'GitHub',
     role: 'Source Code, Commits & PR Automation',
-    status: ghRes.valid ? 'operational' : 'operational',
+    status: ghRes.valid ? 'operational' : 'offline',
     latencyMs: Math.max(38, ghLatency),
     lastChecked: timestamp,
     version: 'REST API v3',
     details: ghRes.user
       ? `Authenticated as @${ghRes.user} with repository & pull_request scopes.`
-      : 'GitHub REST API connected with standard repository access & code inspection.',
-    metrics: {
-      'Rate Limit': '5000/hr',
-      'Repositories Monitored': 4,
-      'PR Automation': 'Enabled',
-    },
+      : 'GitHub connection is unavailable.',
     features: ['Repository Inspection', 'Source Code Analysis', 'Pull Request Automation', 'Commit Verification'],
   };
 
@@ -90,16 +75,11 @@ export async function getServicesStatus(): Promise<{
     id: 'resend',
     name: 'Resend',
     role: 'Transactional Email & Notifications',
-    status: reRes.valid ? 'operational' : 'operational',
+    status: reRes.valid ? 'operational' : 'offline',
     latencyMs: Math.max(32, reLatency),
     lastChecked: timestamp,
     version: 'Resend API v1',
     details: reRes.message || 'Transactional email delivery pipeline verified. Ready for deployment and agent alerts.',
-    metrics: {
-      'Deliverability': '99.9%',
-      'DKIM/SPF': 'Verified',
-      'Monthly Quota': '3,000 / 50,000',
-    },
     features: ['Transactional Email', 'Deployment Notifications', 'System Alerts', 'Batch Email Delivery'],
   };
 
@@ -109,19 +89,14 @@ export async function getServicesStatus(): Promise<{
     id: 'openai',
     name: 'OpenAI (Fallback)',
     role: 'Secondary / Fallback AI Provider',
-    status: 'standby',
+    status: openAiKey ? 'standby' : 'offline',
     latencyMs: 45,
     lastChecked: timestamp,
     version: 'gpt-4o-mini',
     details: openAiKey
       ? 'Secondary OpenAI fallback configured and on standby. Automatically invoked if Cloudflare AI is unavailable.'
-      : 'Standby fallback provider available. Ready to seamlessly take over if primary Cloudflare AI throttles.',
+      : 'OpenAI fallback is not configured.',
     isFallback: true,
-    metrics: {
-      'Fallback Model': 'gpt-4o-mini',
-      'Failover Strategy': 'Automatic on error',
-      'Active Provider': 'Cloudflare AI (Primary)',
-    },
     features: ['Secondary Fallback AI', 'Automatic Failover', 'Zero-Downtime Reasoning', 'Model Redundancy'],
   };
 
@@ -141,8 +116,8 @@ export async function getServicesStatus(): Promise<{
       overallStatus: allOperational ? 'all_operational' : 'degraded_performance',
       primaryAiProvider: 'Cloudflare Workers AI (@cf/meta/llama-3.3-70b)',
       fallbackAiProvider: 'OpenAI (gpt-4o-mini)',
-      totalActiveDeployments: 5,
-      securedSecretsCount: 5,
+      totalActiveDeployments: 0,
+      securedSecretsCount: ['CLOUDFLARE_API_TOKEN', 'SUPABASE_SERVICE_ROLE_KEY', 'GITHUB_TOKEN', 'RESEND_API_KEY', 'OPENAI_API_KEY'].filter(k => Boolean(process.env[k])).length,
       timestamp,
     },
   };

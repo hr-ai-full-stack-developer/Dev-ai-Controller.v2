@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api.js';
 import React, { useState, useEffect } from 'react';
 import { Database, ExternalLink, RefreshCw, Copy, Check, BookOpen, Layers } from 'lucide-react';
 import type { LLMDocEntry } from '../types/index.js';
@@ -12,7 +13,7 @@ export const DocsViewer: React.FC = () => {
   const fetchDocs = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/docs/llms');
+      const res = await apiFetch('/api/docs/llms');
       const data = await res.json();
       if (data.success && data.docs) {
         setDocs(data.docs);
@@ -31,7 +32,7 @@ export const DocsViewer: React.FC = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      const res = await fetch('/api/docs/llms/refresh', {
+      const res = await apiFetch('/api/docs/llms/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: selectedId }),

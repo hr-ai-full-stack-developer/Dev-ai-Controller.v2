@@ -1,3 +1,5 @@
+> **Current implementation:** See [DEPLOYMENT.md](DEPLOYMENT.md) for the actual shared API, deployment steps, required secrets, and remaining limitations. The architecture specification below includes planned capabilities; scheduling, password recovery, and durable application state are not yet implemented.
+
 # ⚡ Dev’ai Controller — General AI Agent Platform
 # 7-Step Canonical Autonomous Lifecycle & Governance Standard
 

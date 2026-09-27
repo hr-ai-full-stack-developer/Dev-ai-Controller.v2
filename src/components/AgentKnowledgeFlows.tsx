@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api.js';
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
@@ -99,8 +100,8 @@ export const AgentKnowledgeFlows: React.FC<AgentKnowledgeFlowsProps> = ({
   const fetchKnowledgeData = async () => {
     try {
       const [allRes, compRes] = await Promise.all([
-        fetch('/v1/knowledge').then((r) => r.json()).catch(() => ({ items: [] })),
-        fetch(`/v1/agents/${selectedAgentId}/compatible-knowledge`).then((r) => r.json()).catch(() => ({ items: [] })),
+        apiFetch('/v1/knowledge').then((r) => r.json()).catch(() => ({ items: [] })),
+        apiFetch(`/v1/agents/${selectedAgentId}/compatible-knowledge`).then((r) => r.json()).catch(() => ({ items: [] })),
       ]);
       if (allRes.items) setKnowledgeItems(allRes.items);
       if (compRes.items) setCompatibleItems(compRes.items);
@@ -117,7 +118,7 @@ export const AgentKnowledgeFlows: React.FC<AgentKnowledgeFlowsProps> = ({
     setCurrentSimStageIndex(-1);
 
     try {
-      const res = await fetch(`/v1/agents/${selectedAgent.id}/simulate-flow`, {
+      const res = await apiFetch(`/v1/agents/${selectedAgent.id}/simulate-flow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: 'Simulated operational task for pipeline verification' }),
@@ -157,7 +158,7 @@ export const AgentKnowledgeFlows: React.FC<AgentKnowledgeFlowsProps> = ({
   const handleLinkKnowledge = async (titleId: string) => {
     setIsLinking(true);
     try {
-      const res = await fetch(`/v1/agents/${selectedAgent.id}/knowledge/link`, {
+      const res = await apiFetch(`/v1/agents/${selectedAgent.id}/knowledge/link`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ titleId }),
@@ -178,7 +179,7 @@ export const AgentKnowledgeFlows: React.FC<AgentKnowledgeFlowsProps> = ({
   // Unlink knowledge item from agent
   const handleUnlinkKnowledge = async (titleId: string) => {
     try {
-      const res = await fetch(`/v1/agents/${selectedAgent.id}/knowledge/unlink`, {
+      const res = await apiFetch(`/v1/agents/${selectedAgent.id}/knowledge/unlink`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ titleId }),

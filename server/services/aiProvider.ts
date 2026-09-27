@@ -1,5 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
-import { cleanResponseText } from '../aiRouter.js';
+import { cleanResponseText } from '../responseText.js';
 
 export interface AiCompletionOptions {
   prompt: string;
@@ -7,6 +6,7 @@ export interface AiCompletionOptions {
   temperature?: number;
   maxTokens?: number;
   forceFallback?: boolean;
+  preserveFormatting?: boolean;
 }
 
 export interface AiCompletionResult {
@@ -17,17 +17,8 @@ export interface AiCompletionResult {
   tokensUsed?: number;
 }
 
-let geminiClient: GoogleGenAI | null = null;
-function getGemini(): GoogleGenAI | null {
-  if (!geminiClient) {
-    try {
-      geminiClient = new GoogleGenAI(process.env.GEMINI_API_KEY ? { apiKey: process.env.GEMINI_API_KEY } : {});
-    } catch (err) {
-      console.warn('Gemini client init failed:', err);
-    }
-  }
-  return geminiClient;
-}
+let aiBinding: { run(model: string, input: any): Promise<any> } | undefined;
+export function setAiBinding(binding: typeof aiBinding) { aiBinding = binding; }
 
 const CLEAN_FORMAT_INSTRUCTION = `
 CRITICAL FORMATTING INSTRUCTIONS:
@@ -49,7 +40,15 @@ export async function generateCompletion(
   const cfToken = process.env.CLOUDFLARE_API_TOKEN;
   const openAiKey = process.env.OPENAI_API_KEY;
 
-  const augmentedSystemPrompt = (options.systemPrompt || '') + CLEAN_FORMAT_INSTRUCTION;
+  const augmentedSystemPrompt = (options.systemPrompt || '') + (options.preserveFormatting ? '' : CLEAN_FORMAT_INSTRUCTION);
+
+  if (!options.forceFallback && aiBinding) {
+    try {
+      const model = process.env.PRIMARY_AI_MODEL || '@cf/meta/llama-3.3-70b-instruct';
+      const result = await aiBinding.run(model, { messages: [{ role: 'system', content: augmentedSystemPrompt }, { role: 'user', content: options.prompt }], max_tokens: options.maxTokens || 2048 });
+      if (result.response) return { text: (options.preserveFormatting ? result.response : cleanResponseText(result.response)), provider: 'cloudflare_ai', model, latencyMs: Date.now() - startTime };
+    } catch (error) { console.warn('Workers AI request failed'); }
+  }
 
   // 1. Try Primary Cloudflare AI (unless forceFallback requested)
   if (!options.forceFallback && cfAccount && cfToken && !cfToken.includes('Demo')) {
@@ -78,7 +77,7 @@ export async function generateCompletion(
         const text = data.result?.response || data.result?.text || '';
         if (text) {
           return {
-            text: cleanResponseText(text),
+            text: (options.preserveFormatting ? text : cleanResponseText(text)),
             provider: 'cloudflare_ai',
             model: '@cf/meta/llama-3.3-70b-instruct',
             latencyMs: Date.now() - startTime,
@@ -115,7 +114,7 @@ export async function generateCompletion(
         const data = await openAiRes.json();
         const text = data.choices?.[0]?.message?.content || '';
         return {
-          text: cleanResponseText(text),
+          text: (options.preserveFormatting ? text : cleanResponseText(text)),
           provider: 'openai_fallback',
           model: 'gpt-4o-mini',
           latencyMs: Date.now() - startTime,
@@ -127,41 +126,5 @@ export async function generateCompletion(
     }
   }
 
-  // 3. Built-in Server Gemini AI fallback (ensures production reliability in sandbox)
-  const gemini = getGemini();
-  if (gemini) {
-    try {
-      const combinedPrompt = `${augmentedSystemPrompt}\n\nUser Request: ${options.prompt}`;
-      const res = await gemini.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: combinedPrompt,
-      });
-      return {
-        text: cleanResponseText(res.text || ''),
-        provider: 'cloudflare_ai',
-        model: '@cf/meta/llama-3.3-70b-instruct (Cloudflare Gateway)',
-        latencyMs: Date.now() - startTime,
-      };
-    } catch (err) {
-      console.warn('Gemini proxy error:', err);
-    }
-  }
-
-  // Default simulated high-intelligence coding assistant response
-  const defaultText = [
-    'Cloudflare Workers AI (Llama 3.3 70B)',
-    '',
-    'Successfully analyzed codebase and executed requested task.',
-    'Execution Plan:',
-    '• Inspected repository architecture and verified bindings',
-    '• Generated code modifications without breaking changes',
-    '• Prepared branch and verified zero-trust security boundary',
-  ].join('\n');
-
-  return {
-    text: cleanResponseText(defaultText),
-    provider: 'cloudflare_ai',
-    model: '@cf/meta/llama-3.3-70b-instruct',
-    latencyMs: Date.now() - startTime,
-  };
+  throw new Error('No AI provider could complete the request. Check your configured AI connection and try again.');
 }

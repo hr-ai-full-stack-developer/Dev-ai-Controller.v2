@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api.js';
 import React, { useState, useEffect } from 'react';
 import {
   Clock,
@@ -55,7 +56,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
   const fetchSessions = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/chat/sessions');
+      const res = await apiFetch('/api/chat/sessions');
       const data = await res.json();
       if (data.success && data.sessions) {
         setSessions(data.sessions);
@@ -74,7 +75,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
   const handleInspectSession = async (session: ChatSession) => {
     setIsDetailLoading(true);
     try {
-      const res = await fetch(`/api/chat/sessions/${session.id}`);
+      const res = await apiFetch(`/api/chat/sessions/${session.id}`);
       const data = await res.json();
       if (data.success) {
         setSelectedSessionDetail({
@@ -91,7 +92,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
 
   const handleDeleteSession = async (sessionId: string) => {
     try {
-      const res = await fetch(`/api/chat/sessions/${sessionId}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/chat/sessions/${sessionId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         setSessions((prev) => prev.filter((s) => s.id !== sessionId));

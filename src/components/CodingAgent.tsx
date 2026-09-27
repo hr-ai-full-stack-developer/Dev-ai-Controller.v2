@@ -30,8 +30,8 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
   isLoading,
 }) => {
   const [prompt, setPrompt] = useState('');
-  const [selectedRepo, setSelectedRepo] = useState('operava/operava-worker-core');
-  const [selectedBranch, setSelectedBranch] = useState('feat/cf-ai-orchestration');
+  const [selectedRepo, setSelectedRepo] = useState('hr-ai-full-stack-developer/Dev-ai-Controller.v2');
+  const [selectedBranch, setSelectedBranch] = useState('devai/proposal');
   const [activeTask, setActiveTask] = useState<CodingTask | null>(tasks[0] || null);
 
   const quickPrompts = [
@@ -63,7 +63,7 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
               </h2>
             </div>
             <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6]">
-              Generate code changes, inspect repository files, and automate tasks.
+              Inspect repository files and create a draft pull request for review.
             </p>
           </div>
         </div>
@@ -76,15 +76,11 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
             </label>
             <div className="relative">
               <FolderGit2 className="absolute left-3 top-2.5 h-4 w-4 text-[#5f6368] dark:text-[#9aa0a6]" />
-              <select
+              <input
                 value={selectedRepo}
                 onChange={(e) => setSelectedRepo(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[#f8f9fb] dark:bg-[#1f232c] border border-[#e2e4e9] dark:border-[#2e333d] text-[#1a1d24] dark:text-[#f0f3f6] focus:outline-hidden focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="operava/operava-worker-core">operava/operava-worker-core (Cloudflare Workers API)</option>
-                <option value="operava/ai-token-hub-frontend">operava/ai-token-hub-frontend (React + Vite Edge)</option>
-                <option value="operava/cloudflare-edge-router">operava/cloudflare-edge-router (Routing & Auth Gateway)</option>
-              </select>
+              />
             </div>
           </div>
 

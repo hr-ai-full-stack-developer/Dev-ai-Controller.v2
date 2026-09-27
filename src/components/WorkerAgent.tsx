@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/api.js';
 import React, { useState, useEffect } from 'react';
 import {
   Bot,
@@ -83,8 +84,8 @@ export const WorkerAgent: React.FC = () => {
     setIsLoadingDocs(true);
     try {
       const [configRes, docsRes] = await Promise.all([
-        fetch('/api/worker-agent/config'),
-        fetch('/api/worker-agent/knowledge'),
+        apiFetch('/api/worker-agent/config'),
+        apiFetch('/api/worker-agent/knowledge'),
       ]);
       const configData = await configRes.json();
       const docsData = await docsRes.json();
@@ -118,7 +119,7 @@ export const WorkerAgent: React.FC = () => {
     setConfigFeedback(null);
     try {
       const token = localStorage.getItem('admin_token');
-      const res = await fetch('/api/worker-agent/config', {
+      const res = await apiFetch('/api/worker-agent/config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +146,7 @@ export const WorkerAgent: React.FC = () => {
   const handleToggleDoc = async (id: string) => {
     try {
       const token = localStorage.getItem('admin_token');
-      const res = await fetch(`/api/worker-agent/knowledge/${id}/toggle`, {
+      const res = await apiFetch(`/api/worker-agent/knowledge/${id}/toggle`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -162,7 +163,7 @@ export const WorkerAgent: React.FC = () => {
   const handleDeleteDoc = async (id: string) => {
     try {
       const token = localStorage.getItem('admin_token');
-      const res = await fetch(`/api/worker-agent/knowledge/${id}`, {
+      const res = await apiFetch(`/api/worker-agent/knowledge/${id}`, {
         method: 'DELETE',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -204,7 +205,7 @@ export const WorkerAgent: React.FC = () => {
     setIsAddingDoc(true);
     try {
       const token = localStorage.getItem('admin_token');
-      const res = await fetch('/api/worker-agent/knowledge', {
+      const res = await apiFetch('/api/worker-agent/knowledge', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -244,7 +245,7 @@ export const WorkerAgent: React.FC = () => {
     setSimulationResult(null);
 
     try {
-      const res = await fetch('/api/worker-agent/simulate', {
+      const res = await apiFetch('/api/worker-agent/simulate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -269,7 +270,7 @@ export const WorkerAgent: React.FC = () => {
   // Open Export Modal
   const handleOpenExport = async () => {
     try {
-      const res = await fetch('/api/worker-agent/export');
+      const res = await apiFetch('/api/worker-agent/export');
       const data = await res.json();
       if (data.success) {
         setExportData({ workerCode: data.workerCode, wranglerToml: data.wranglerToml });

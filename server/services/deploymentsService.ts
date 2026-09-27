@@ -1,168 +1,51 @@
 import type { DeployedApp } from '../../src/types/index.js';
 import { addAuditLog } from '../storage.js';
 
-let deployedApps: DeployedApp[] = [
-  {
-    id: 'app-cf-api-worker',
-    name: 'api-core-worker',
-    platform: 'Cloudflare Workers',
-    environment: 'production',
-    status: 'healthy',
-    url: 'https://api-core-worker.operava.workers.dev',
-    commitSha: '9f83a21',
-    commitMessage: 'feat: add Workers AI Llama 3.3 orchestration route',
-    branch: 'main',
-    deployedAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
-    latencyMs: 34,
-    uptime: '99.99%',
-    requests24h: 184500,
-  },
-  {
-    id: 'app-cf-dashboard-edge',
-    name: 'dashboard-edge',
-    platform: 'Cloudflare Pages',
-    environment: 'production',
-    status: 'healthy',
-    url: 'https://hub.operava.dev',
-    commitSha: 'c4e7102',
-    commitMessage: 'build: bundle optimized static assets with edge routing',
-    branch: 'main',
-    deployedAt: new Date(Date.now() - 1000 * 60 * 115).toISOString(),
-    latencyMs: 18,
-    uptime: '100.00%',
-    requests24h: 312000,
-  },
-  {
-    id: 'app-cf-email-dispatch',
-    name: 'resend-notifier-worker',
-    platform: 'Cloudflare Workers',
-    environment: 'production',
-    status: 'healthy',
-    url: 'https://resend-notifier-worker.operava.workers.dev',
-    commitSha: 'a12bc90',
-    commitMessage: 'feat: transactional email triggers for deployment events',
-    branch: 'main',
-    deployedAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
-    latencyMs: 42,
-    uptime: '99.95%',
-    requests24h: 48900,
-  },
-  {
-    id: 'app-cf-auth-gatekeeper',
-    name: 'auth-gatekeeper-staging',
-    platform: 'Cloudflare Workers',
-    environment: 'staging',
-    status: 'active',
-    url: 'https://auth-gatekeeper-staging.operava.workers.dev',
-    commitSha: '56d11e9',
-    commitMessage: 'test: Supabase JWT validation and RBAC edge headers',
-    branch: 'feat/supabase-auth-verify',
-    deployedAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    latencyMs: 29,
-    uptime: '99.91%',
-    requests24h: 12400,
-  },
-  {
-    id: 'app-sb-edge-functions',
-    name: 'supabase-webhook-edge',
-    platform: 'Supabase Edge',
-    environment: 'production',
-    status: 'healthy',
-    url: 'https://yrqbxnzvplq.supabase.co/functions/v1/github-webhook',
-    commitSha: '88a31e5',
-    commitMessage: 'refactor: sync audit trail logs on repo pull_request events',
-    branch: 'main',
-    deployedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    latencyMs: 58,
-    uptime: '99.98%',
-    requests24h: 92300,
-  },
-];
+async function cloudflare(path: string, init: RequestInit = {}) {
+  const { CLOUDFLARE_ACCOUNT_ID: account, CLOUDFLARE_API_TOKEN: token } = process.env;
+  if (!account || !token) throw new Error('Cloudflare deployment access has not been configured.');
+  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}${path}`, {
+    ...init, signal: AbortSignal.timeout(20000),
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+  });
+  const data = await response.json();
+  if (!response.ok || !data.success) throw new Error(data.errors?.[0]?.message || `Cloudflare request failed (${response.status}).`);
+  return data.result;
+}
 
 export async function listDeployedApps(): Promise<DeployedApp[]> {
-  return deployedApps;
+  const scripts = await cloudflare('/workers/scripts');
+  return scripts.map((script: any) => ({
+    id: script.id, name: script.id, platform: 'Cloudflare Workers', environment: 'production',
+    status: 'active', url: '', commitSha: script.etag || '', commitMessage: 'Worker exists; traffic health has not been measured.',
+    branch: '', deployedAt: script.modified_on, latencyMs: 0, uptime: 'Not measured', requests24h: 0,
+  }));
 }
 
-export async function triggerDeployment(
-  appId: string,
-  user: string = 'secured.jelvan@gmail.com'
-): Promise<{ success: boolean; app: DeployedApp; message: string }> {
-  const appIndex = deployedApps.findIndex((a) => a.id === appId);
-  if (appIndex === -1) {
-    throw new Error(`Deployed application with ID "${appId}" not found`);
+async function deployVersion(appId: string, rollback: boolean, user: string) {
+  if (!/^[a-zA-Z0-9_-]+$/.test(appId)) throw new Error('Invalid Worker name.');
+  const base = `/workers/scripts/${encodeURIComponent(appId)}`;
+  const current = await cloudflare(`${base}/deployments`);
+  const deployments = current.deployments || current;
+  if (!Array.isArray(deployments) || !deployments.length) throw new Error('No deployment history exists for this Worker.');
+  let versions = deployments[0].versions;
+  if (rollback) {
+    const previous = deployments.slice(1).find((d: any) => JSON.stringify(d.versions) !== JSON.stringify(versions));
+    if (!previous) throw new Error('No previous deployment is available to restore.');
+    versions = previous.versions;
+  } else {
+    const uploaded = await cloudflare(`${base}/versions`);
+    const latest = (uploaded.items || uploaded)[0];
+    if (!latest?.id) throw new Error('No uploaded Worker version is available to deploy.');
+    versions = [{ version_id: latest.id, percentage: 100 }];
   }
-
-  // Set status to deploying briefly then healthy
-  const app = deployedApps[appIndex];
-  const newCommitSha = Math.random().toString(16).substring(2, 9);
-  
-  deployedApps[appIndex] = {
-    ...app,
-    status: 'deploying',
-    commitSha: newCommitSha,
-    commitMessage: `chore: automatic edge deployment triggered by ${user}`,
-    deployedAt: new Date().toISOString(),
-  };
-
-  // Simulate edge deployment completion in 800ms
-  setTimeout(() => {
-    deployedApps[appIndex] = {
-      ...deployedApps[appIndex],
-      status: 'healthy',
-      latencyMs: Math.floor(20 + Math.random() * 25),
-    };
-  }, 1200);
-
-  await addAuditLog({
-    action: `deploy.trigger.${app.name}`,
-    provider: 'cloudflare',
-    status: 'success',
-    durationMs: 420,
-    summary: `Triggered deployment for ${app.name} (${app.environment}) on ${app.platform}`,
-    details: `Commit ${newCommitSha} building and propagating to Cloudflare edge points of presence.`,
-    user,
+  const deployment = await cloudflare(`${base}/deployments`, {
+    method: 'POST', body: JSON.stringify({ strategy: 'percentage', versions,
+      annotations: { 'workers/message': `${rollback ? 'Rollback' : 'Deploy uploaded version'} requested by ${user}` } }),
   });
-
-  return {
-    success: true,
-    app: deployedApps[appIndex],
-    message: `Deployment initiated for ${app.name}. Propagating to 300+ Cloudflare edge PoPs.`,
-  };
+  await addAuditLog({ action: rollback ? 'deploy.rollback' : 'deploy.trigger', provider: 'cloudflare', status: 'success', durationMs: 0,
+    summary: `Cloudflare accepted deployment for ${appId}`, details: `Deployment ID: ${deployment.id}`, user });
+  return { success: true, deploymentId: deployment.id, message: 'Cloudflare accepted the deployment. Refresh to check its status.' };
 }
-
-export async function rollbackDeployment(
-  appId: string,
-  user: string = 'secured.jelvan@gmail.com'
-): Promise<{ success: boolean; app: DeployedApp; message: string }> {
-  const appIndex = deployedApps.findIndex((a) => a.id === appId);
-  if (appIndex === -1) {
-    throw new Error(`Deployed application with ID "${appId}" not found`);
-  }
-
-  const app = deployedApps[appIndex];
-  const rollbackSha = 'prev-' + Math.random().toString(16).substring(2, 7);
-
-  deployedApps[appIndex] = {
-    ...app,
-    status: 'healthy',
-    commitSha: rollbackSha,
-    commitMessage: `revert: rolled back to previous stable release by ${user}`,
-    deployedAt: new Date().toISOString(),
-  };
-
-  await addAuditLog({
-    action: `deploy.rollback.${app.name}`,
-    provider: 'cloudflare',
-    status: 'success',
-    durationMs: 310,
-    summary: `Rolled back ${app.name} to previous release`,
-    details: `Instant zero-downtime rollback executed on Cloudflare Edge.`,
-    user,
-  });
-
-  return {
-    success: true,
-    app: deployedApps[appIndex],
-    message: `Instant rollback completed for ${app.name}. Previous release active.`,
-  };
-}
+export const triggerDeployment = (appId: string, user = 'operator') => deployVersion(appId, false, user);
+export const rollbackDeployment = (appId: string, user = 'operator') => deployVersion(appId, true, user);

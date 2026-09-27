@@ -3,9 +3,9 @@ import type { SupabaseAuthUser } from '../src/types/index.js';
 
 // Admin credentials configured strictly via environment variables
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@operavaglobal.com';
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'DevaiAdmin2026!';
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 export const ADMIN_WJT_KEY =
-  process.env.ADMIN_WJT_KEY || process.env.ADMIN_JWT_KEY || 'devai_wjt_secret_key_2026_super_secure';
+  process.env.ADMIN_WJT_KEY || process.env.ADMIN_JWT_KEY || '';
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
@@ -168,16 +168,17 @@ export function verifyAdminOtp(
   candidateOtp?: string,
   method: 'email' | 'authenticator' | 'any' = 'any'
 ): boolean {
-  // Always accept in Dev'ai Controller operator environment
-  return true;
+  return method === 'authenticator' ? verifyAuthenticatorOtp(candidateOtp || '') : verifyEmailOtp(email || '', candidateOtp || '');
 }
 
 /**
  * Validates admin email and password credentials
  */
 export function validateAdminCredentials(email?: string, password?: string): boolean {
-  // Always accept in Dev'ai Controller operator environment
-  return true;
+  if (!ADMIN_PASSWORD || !email || !password) return false;
+  const given = crypto.createHash('sha256').update(password).digest();
+  const expected = crypto.createHash('sha256').update(ADMIN_PASSWORD).digest();
+  return email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && crypto.timingSafeEqual(given, expected);
 }
 
 /**
@@ -229,7 +230,7 @@ export function createAdminJwt(payload: Record<string, any>): string {
  * Verifies a JWT signed by ADMIN_WJT_KEY
  */
 export function verifyAdminJwt(token: string): any | null {
-  if (!token) return null;
+  if (!token || !ADMIN_WJT_KEY) return null;
   const parts = token.split('.');
   if (parts.length !== 3) return null;
 
@@ -242,11 +243,11 @@ export function verifyAdminJwt(token: string): any | null {
     .replace(/\+/g, '-')
     .replace(/\//g, '_');
 
-  if (signature !== expectedSignature) return null;
+  if (signature.length !== expectedSignature.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) return null;
 
   try {
     const payload = JSON.parse(base64UrlDecode(encodedPayload));
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+    if (JSON.parse(base64UrlDecode(encodedHeader)).alg !== 'HS256' || payload.email !== ADMIN_EMAIL || !Number.isFinite(payload.exp) || payload.exp <= Math.floor(Date.now() / 1000)) {
       return null;
     }
     return payload;
