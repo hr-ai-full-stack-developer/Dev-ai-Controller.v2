@@ -40,7 +40,8 @@ import {
   verifyAdminJwt,
   getAdminUserProfile,
 } from './auth.js';
-import { sendResendEmail } from './services/resend.js';
+import { operavaEmailTemplate, sendTransactionalEmail } from './services/emailDeliveryService.js';
+import { runtimeEnv } from './runtimeEnv.js';
 import {
   listPlatformAgents,
   getPlatformAgent,
@@ -84,7 +85,7 @@ export function createApp() {
       const origin = new URL(req.headers.origin);
       if (origin.host !== req.headers.host) return res.status(403).json({ success: false, error: 'Cross-origin request rejected.' });
     }
-    const publicRoutes = ['/api/health', '/api/auth/login', '/api/auth/readiness', '/api/auth/reset-password', '/v1/widget/chat'];
+    const publicRoutes = ['/api/health', '/api/auth/login', '/api/auth/readiness', '/api/auth/reset-password', '/api/auth/email-otp/request', '/api/auth/email-otp/verify', '/v1/widget/chat'];
     if (publicRoutes.includes(req.path)) return next();
     return requireAdminAuth(req, res, next);
   });
@@ -232,6 +233,58 @@ export function createApp() {
     res.clearCookie('devai_session', { path: '/' });
     res.json({ success: true });
   });
+  const emailOtpRequests = new Map<string, number>();
+  app.post('/api/auth/email-otp/request', async (req, res) => {
+    const requested = String(req.body?.email || '').trim().toLowerCase();
+    const adminEmail = getAdminAuthConfig().email.trim().toLowerCase();
+    // Generic response avoids disclosing the configured administrator address.
+    const accepted = { success: true, message: 'If this address is authorized, a verification code will be sent.' };
+    if (!requested || requested !== adminEmail || !isAdminAuthConfigured()) return res.json(accepted);
+    const last = emailOtpRequests.get(requested) || 0;
+    if (Date.now() - last < 60_000) return res.status(429).json({ success: false, error: 'Please wait before requesting another code.' });
+    try {
+      const { otp, expiresAt } = generateEmailOtp(requested);
+      const html = operavaEmailTemplate({
+        eyebrow: 'Secure verification',
+        title: 'Your OPERAVA verification code',
+        message: 'Use this code to confirm your identity. It expires shortly. If you did not request this code, you can ignore this email.',
+        code: otp,
+      });
+      const delivery = await sendTransactionalEmail({
+        to: requested,
+        subject: 'Your OPERAVA verification code',
+        html,
+        text: `Your OPERAVA verification code is ${otp}. It expires at ${new Date(expiresAt).toISOString()}.`,
+      });
+      emailOtpRequests.set(requested, Date.now());
+      return res.json({ ...accepted, delivery: { provider: delivery.provider, fallbackUsed: delivery.fallbackUsed } });
+    } catch (err: any) {
+      console.error('Email OTP delivery failed:', err);
+      return res.status(503).json({ success: false, error: 'Verification email could not be delivered.' });
+    }
+  });
+
+  app.post('/api/auth/email-otp/verify', (req, res) => {
+    const requested = String(req.body?.email || '').trim().toLowerCase();
+    const adminEmail = getAdminAuthConfig().email.trim().toLowerCase();
+    if (!requested || requested !== adminEmail || !verifyEmailOtp(requested, String(req.body?.otp || ''))) {
+      return res.status(401).json({ success: false, verified: false, error: 'Verification code is invalid or expired.' });
+    }
+    return res.json({ success: true, verified: true });
+  });
+
+  app.post('/api/email/send', async (req, res) => {
+    try {
+      const { to, subject, title, message, actionLabel, actionUrl } = req.body || {};
+      if (!to || !subject || !title || !message) return res.status(400).json({ success: false, error: 'to, subject, title, and message are required.' });
+      const html = operavaEmailTemplate({ eyebrow: 'OPERAVA update', title, message, actionLabel, actionUrl });
+      const delivery = await sendTransactionalEmail({ to, subject, html, text: message });
+      res.json({ success: true, delivery });
+    } catch (err: any) {
+      res.status(503).json({ success: false, error: err.message });
+    }
+  });
+
   app.post('/api/auth/reset-password', (_req, res) => {
     res.status(501).json({ success: false, error: 'Password recovery is not configured. Ask your administrator to reset your access.' });
   });
