@@ -40,7 +40,7 @@ import {
   verifyAdminJwt,
   getAdminUserProfile,
 } from './auth.js';
-import { operavaEmailTemplate, sendTransactionalEmail } from './services/emailDeliveryService.js';
+import { devaiEmailTemplate, sendTransactionalEmail } from './services/emailDeliveryService.js';
 import { notifyAdminAccountEvent } from './services/accountNotificationService.js';
 import {
   listPlatformAgents,
@@ -248,17 +248,17 @@ export function createApp() {
     if (Date.now() - last < 60_000) return res.status(429).json({ success: false, error: 'Please wait before requesting another code.' });
     try {
       const { otp, expiresAt } = generateEmailOtp(requested);
-      const html = operavaEmailTemplate({
+      const html = devaiEmailTemplate({
         eyebrow: 'Secure verification',
-        title: 'Your OPERAVA verification code',
+        title: 'Your Dev’ai Controller verification code',
         message: 'Use this code to confirm your identity. It expires shortly. If you did not request this code, you can ignore this email.',
         code: otp,
       });
       const delivery = await sendTransactionalEmail({
         to: requested,
-        subject: 'Your OPERAVA verification code',
+        subject: 'Your Dev’ai Controller verification code',
         html,
-        text: `Your OPERAVA verification code is ${otp}. It expires at ${new Date(expiresAt).toISOString()}.`,
+        text: `Your Dev’ai Controller verification code is ${otp}. It expires at ${new Date(expiresAt).toISOString()}.`,
       });
       emailOtpRequests.set(requested, Date.now());
       void createNotification({ service: 'cloudflare', type: 'email_sent', title: 'Verification code sent', message: 'A one-time verification code was accepted by Cloudflare Email Service.', status: 'sent', recipient: requested, sourceId: delivery.id ? `email:${delivery.id}` : undefined, metadata: { channel: 'email', event: 'otp_requested' } });
@@ -283,7 +283,7 @@ export function createApp() {
     try {
       const { to, subject, title, message, actionLabel, actionUrl } = req.body || {};
       if (!to || !subject || !title || !message) return res.status(400).json({ success: false, error: 'to, subject, title, and message are required.' });
-      const html = operavaEmailTemplate({ eyebrow: 'OPERAVA update', title, message, actionLabel, actionUrl });
+      const html = devaiEmailTemplate({ eyebrow: 'Dev’ai Controller update', title, message, actionLabel, actionUrl });
       const delivery = await sendTransactionalEmail({ to, subject, html, text: message });
       res.json({ success: true, delivery });
     } catch (err: any) {
