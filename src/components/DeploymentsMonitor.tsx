@@ -83,15 +83,8 @@ export const DeploymentsMonitor: React.FC<DeploymentsMonitorProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center space-x-4 text-xs font-medium text-[#5f6368] dark:text-[#9aa0a6]">
-            <div className="flex items-center space-x-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span>5 / 5 Healthy</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <Zap className="h-3.5 w-3.5 text-orange-500" />
-              <span>Avg Latency: 28ms</span>
-            </div>
+          <div className="text-xs font-medium text-[#5f6368] dark:text-[#9aa0a6]">
+            {deployments.length} deployment{deployments.length === 1 ? '' : 's'} found
           </div>
         </div>
       </div>
@@ -116,7 +109,7 @@ export const DeploymentsMonitor: React.FC<DeploymentsMonitorProps> = ({
                   </span>
                   <span className="flex items-center text-xs font-medium text-emerald-600 dark:text-emerald-400">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-                    {app.status === 'deploying' ? 'Deploying to Edge...' : 'Healthy (Active)'}
+                    {app.status === 'deploying' ? 'Deploying…' : app.status === 'failed' ? 'Failed' : 'Deployed'}
                   </span>
                 </div>
 
@@ -136,15 +129,18 @@ export const DeploymentsMonitor: React.FC<DeploymentsMonitorProps> = ({
                     <span>Deployed {new Date(app.deployedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
 
-                  <div className="flex items-center space-x-1">
-                    <Zap className="h-3 w-3 text-purple-500" />
-                    <span>P95 Latency: <strong className="text-[#1a1d24] dark:text-[#f0f3f6]">{app.latencyMs}ms</strong></span>
-                  </div>
-
-                  <div className="flex items-center space-x-1">
-                    <TrendingUp className="h-3 w-3 text-emerald-500" />
-                    <span>Uptime: <strong className="text-[#1a1d24] dark:text-[#f0f3f6]">{app.uptime}</strong></span>
-                  </div>
+                  {app.latencyMs > 0 && (
+                    <div className="flex items-center space-x-1">
+                      <Zap className="h-3 w-3 text-purple-500" />
+                      <span>Latency: <strong className="text-[#1a1d24] dark:text-[#f0f3f6]">{app.latencyMs}ms</strong></span>
+                    </div>
+                  )}
+                  {app.uptime && app.uptime !== 'Not measured' && (
+                    <div className="flex items-center space-x-1">
+                      <TrendingUp className="h-3 w-3 text-emerald-500" />
+                      <span>Uptime: <strong className="text-[#1a1d24] dark:text-[#f0f3f6]">{app.uptime}</strong></span>
+                    </div>
+                  )}
                 </div>
               </div>
 
