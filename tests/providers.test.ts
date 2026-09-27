@@ -57,3 +57,18 @@ test('common service question returns real status path instead of invented AI st
   assert.equal(result.provider, 'system');
   assert.ok(result.message.length > 0);
 });
+
+test('GitHub token check does not invent repository scope when header is absent', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => Response.json({ login: 'developer', public_repos: 3 }, { status: 200 })) as typeof fetch;
+  try {
+    const { testGitHubToken } = await import('../server/services/github.js');
+    const result = await testGitHubToken('test-token');
+    assert.equal(result.valid, true);
+    assert.equal(result.user, 'developer');
+    assert.deepEqual(result.scopes, []);
+    assert.doesNotMatch(result.message || '', /scopes: repo/i);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
