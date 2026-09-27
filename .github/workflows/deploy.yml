@@ -60,6 +60,17 @@ jobs:
           printf '%s' "$ADMIN_EMAIL" | npx wrangler secret put ADMIN_EMAIL
           printf '%s' "$ADMIN_PASSWORD" | npx wrangler secret put ADMIN_PASSWORD
           printf '%s' "$ADMIN_JWT_KEY" | npx wrangler secret put ADMIN_JWT_KEY
+      - name: Provision optional email configuration
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_FORWARD_TO: ${{ secrets.EMAIL_FORWARD_TO }}
+        run: |
+          if [ -n "$RESEND_API_KEY" ]; then printf '%s' "$RESEND_API_KEY" | npx wrangler secret put RESEND_API_KEY; fi
+          if [ -n "$EMAIL_FROM" ]; then printf '%s' "$EMAIL_FROM" | npx wrangler secret put EMAIL_FROM; fi
+          if [ -n "$EMAIL_FORWARD_TO" ]; then printf '%s' "$EMAIL_FORWARD_TO" | npx wrangler secret put EMAIL_FORWARD_TO; fi
       - run: npm run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
