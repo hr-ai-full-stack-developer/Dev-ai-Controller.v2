@@ -114,3 +114,30 @@ test('token encryption fails closed when no encryption secret is configured', as
     if (previous) process.env.WORKER_SECRET = previous;
   }
 });
+
+test('OPERAVA transactional template escapes content and renders verification code', async () => {
+  const { operavaEmailTemplate } = await import('../server/services/emailDeliveryService.js');
+  const html = operavaEmailTemplate({ title: 'Confirm <access>', message: 'Safe & secure', code: '123456' });
+  assert.match(html, /OPERAVA/);
+  assert.match(html, /123456/);
+  assert.equal(html.includes('Confirm <access>'), false);
+  assert.match(html, /Confirm &lt;access&gt;/);
+});
+
+test('transactional email falls back to Cloudflare binding when Resend is unavailable', async () => {
+  const { setWorkerEnv } = await import('../server/runtimeEnv.js');
+  const { setCloudflareEmailBinding, sendTransactionalEmail } = await import('../server/services/emailDeliveryService.js');
+  let captured: any = null;
+  setWorkerEnv({ EMAIL_FROM: 'OPERAVA <noreply@example.test>' });
+  setCloudflareEmailBinding({ send: async (message: any) => { captured = message; return { messageId: 'cf-test-1' }; } });
+  try {
+    const result = await sendTransactionalEmail({ to: 'admin@example.test', subject: 'Test', text: 'Hello', html: '<p>Hello</p>' });
+    assert.equal(result.provider, 'cloudflare-email');
+    assert.equal(result.fallbackUsed, true);
+    assert.equal(result.id, 'cf-test-1');
+    assert.equal(captured.from, 'OPERAVA <noreply@example.test>');
+  } finally {
+    setCloudflareEmailBinding(null);
+    setWorkerEnv(null);
+  }
+});
