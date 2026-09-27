@@ -86,59 +86,15 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
     );
   };
 
-  const serviceList: ServiceStatusInfo[] = [
-    services.cloudflare || {
-      id: 'cloudflare',
-      name: 'Cloudflare',
-      role: 'Primary Runtime, Edge APIs & Cloudflare AI',
-      status: 'operational',
-      latencyMs: 24,
-      lastChecked: new Date().toISOString(),
-      details: 'Workers runtime, request routing, and Cloudflare AI healthy.',
-      features: ['Serverless Runtime', 'Cloudflare Workers AI', 'Request Routing', 'Zero-Trust Secrets'],
-    },
-    services.supabase || {
-      id: 'supabase',
-      name: 'Supabase',
-      role: 'Authentication & Central Database',
-      status: 'operational',
-      latencyMs: 28,
-      lastChecked: new Date().toISOString(),
-      details: 'Supabase Auth session validator and PostgreSQL database connected with RLS policies.',
-      features: ['Supabase Auth', 'PostgreSQL Database', 'Row Level Security', 'Audit Trail Storage'],
-    },
-    services.github || {
-      id: 'github',
-      name: 'GitHub',
-      role: 'Source Code, Commits & PR Automation',
-      status: 'operational',
-      latencyMs: 42,
-      lastChecked: new Date().toISOString(),
-      details: 'GitHub REST API connected with standard repository access & code inspection.',
-      features: ['Repository Inspection', 'Source Code Analysis', 'Pull Request Automation', 'Commit Verification'],
-    },
-    services.resend || {
-      id: 'resend',
-      name: 'Resend',
-      role: 'Transactional Email & Notifications',
-      status: 'operational',
-      latencyMs: 35,
-      lastChecked: new Date().toISOString(),
-      details: 'Transactional email delivery pipeline verified. Ready for deployment and agent alerts.',
-      features: ['Transactional Email', 'Deployment Notifications', 'System Alerts', 'Batch Email Delivery'],
-    },
-    services.openai || {
-      id: 'openai',
-      name: 'OpenAI (Fallback)',
-      role: 'Secondary / Fallback AI Provider',
-      status: 'standby',
-      latencyMs: 48,
-      lastChecked: new Date().toISOString(),
-      details: 'Standby fallback provider available. Ready to seamlessly take over if primary Cloudflare AI throttles.',
-      isFallback: true,
-      features: ['Secondary Fallback AI', 'Automatic Failover', 'Zero-Downtime Reasoning', 'Model Redundancy'],
-    },
-  ];
+  const serviceList: ServiceStatusInfo[] = Object.values(services).filter(Boolean);
+  const onlineCount = serviceList.filter((service) => service.status === 'operational' || service.status === 'standby').length;
+  const totalCount = serviceList.length;
+  const overallLabel =
+    systemSummary?.overallStatus === 'all_operational'
+      ? 'All checked services operational'
+      : systemSummary?.overallStatus === 'action_required'
+        ? 'Action required'
+        : 'Some services need attention';
 
   return (
     <div className="space-y-6">
@@ -182,14 +138,14 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
           <div className="p-3 rounded-xl bg-white/80 dark:bg-[#1f232c]/80 border border-[#e2e4e9] dark:border-[#2e333d]">
             <p className="text-[11px] font-medium text-[#5f6368] dark:text-[#9aa0a6]">Connected Services</p>
             <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 mt-0.5 truncate">
-              5 of 5 Online
+              {onlineCount} of {totalCount} available
             </p>
           </div>
 
           <div className="p-3 rounded-xl bg-white/80 dark:bg-[#1f232c]/80 border border-[#e2e4e9] dark:border-[#2e333d]">
             <p className="text-[11px] font-medium text-[#5f6368] dark:text-[#9aa0a6]">System Health</p>
             <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate">
-              All Operational
+              {overallLabel}
             </p>
           </div>
 
@@ -215,7 +171,7 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
               <ArrowUpRight className="h-3 w-3 text-purple-500" />
             </div>
             <p className="text-xs font-semibold text-[#1a1d24] dark:text-[#f0f3f6] mt-0.5">
-              Active & Verified
+              Open notifications
             </p>
           </div>
         </div>
