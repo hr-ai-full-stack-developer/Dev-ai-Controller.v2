@@ -9,14 +9,7 @@ interface AdminAuthContextType {
   setAuthenticatedUser: (user: SupabaseAuthUser, token: string) => void;
 }
 
-const defaultUser: SupabaseAuthUser = {
-  id: 'usr-sb-7782194',
-  email: 'secured.jelvan@gmail.com',
-  name: 'Jelvan',
-  role: 'Developer / Operator',
-  sessionValid: true,
-  lastSignInAt: new Date().toISOString(),
-};
+const defaultUser: SupabaseAuthUser = { id: '', email: '', name: 'Operator', role: 'Developer / Operator', sessionValid: false, lastSignInAt: '' };
 
 export const AdminAuthContext = createContext<AdminAuthContextType>({
   isAuthenticated: false,
