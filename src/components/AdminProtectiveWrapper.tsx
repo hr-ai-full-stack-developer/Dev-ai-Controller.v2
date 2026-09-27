@@ -31,6 +31,7 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [authReadiness, setAuthReadiness] = useState<'checking' | 'ready' | 'missing' | 'unreachable'>('checking');
 
   // Reset password modal state
   const [showResetModal, setShowResetModal] = useState(false);
@@ -43,6 +44,7 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
     localStorage.removeItem('admin_token');
     const expire = () => { setIsAuthenticated(false); setToken(null); };
     window.addEventListener('devai:session-expired', expire);
+    apiFetch('/api/auth/readiness').then(r => r.json()).then(data => setAuthReadiness(data.configured ? 'ready' : 'missing')).catch(() => setAuthReadiness('unreachable'));
     apiFetch('/api/auth/verify-session')
       .then(r => r.json()).then(data => { setCurrentUser(data.user); setIsAuthenticated(true); })
       .catch(() => setIsAuthenticated(false)).finally(() => setIsCheckingSession(false));
@@ -294,6 +296,8 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
                 <p className="mt-1 text-[13px] text-[#6b7280]">Sign in to OPERAVA</p>
               </div>
 
+              {authReadiness === 'missing' && <div role="alert" className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-[12px] text-amber-800">Sign-in is not configured on the server. Add ADMIN_EMAIL, ADMIN_PASSWORD, and ADMIN_JWT_KEY to the Cloudflare Worker secrets.</div>}
+              {authReadiness === 'unreachable' && <div role="alert" className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-[12px] text-red-700">The login API could not be reached. Check the Worker deployment and /api routing.</div>}
               <form onSubmit={handleLoginSubmit} className="space-y-4 min-w-0" noValidate>
                 {/* Email Input */}
                 <div className="space-y-1.5 min-w-0">
@@ -418,7 +422,7 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
                 {/* Sign-in Button */}
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || authReadiness === 'missing' || authReadiness === 'unreachable'}
                   className="w-full h-[44px] rounded-xl bg-[#E5E7EB] hover:bg-[#D1D5DB] active:bg-[#CBD5E1] text-[#111827] text-[14px] font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)] box-border"
                 >
                   {isSubmitting ? (
