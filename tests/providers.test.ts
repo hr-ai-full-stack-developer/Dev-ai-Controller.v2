@@ -79,3 +79,14 @@ test('worker agent starts without fabricated organization knowledge', async () =
   assert.deepEqual(getWorkerAgentConfig().activeKnowledgeDocIds, []);
   assert.equal(getWorkerAgentConfig().cloudflareRoute, '');
 });
+
+test('developer agent describes verification without claiming unrun compiler or Cloudflare checks', async () => {
+  const { getPlatformAgent } = await import('../server/services/agentPlatformService.js');
+  const agent = getPlatformAgent('agent-developer-01');
+  assert.ok(agent);
+  const verify = agent!.structureFlow!.stages.find((s: any) => s.canonicalPhase === 'verify_outcome_compare_resources');
+  assert.ok(verify);
+  assert.match(verify!.description, /actually ran/i);
+  assert.deepEqual(verify!.toolDependencies, ['github.read']);
+  assert.doesNotMatch(verify!.description, /executes compiler/i);
+});
