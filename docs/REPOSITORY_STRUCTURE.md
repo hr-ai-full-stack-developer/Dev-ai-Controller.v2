@@ -10,7 +10,8 @@ This file is the map for contributors and operators. The production behavior is 
 │   ├── app.ts               # Shared authenticated HTTP API
 │   ├── auth.ts              # Operator credentials, TOTP/email OTP, signed sessions
 │   ├── storage.ts           # Application storage facade; partly optional Supabase, partly memory
-│   └── services/            # Cloudflare/GitHub/Resend/AI/agent service adapters
+│   └── services/            # Cloudflare/GitHub/Resend/AI/agent capability + memory adapters
+├── supabase/                # Explicit SQL schemas, including separate durable agent memory
 ├── src/
 │   ├── components/          # React operator UI
 │   ├── context/             # Client authentication/session context
@@ -67,6 +68,7 @@ Local development runs the same Express application through `server.ts`, reducin
 | `docs/REPOSITORY_STRUCTURE.md` | Source tree ownership and placement rules |
 | `docs/CONVERSATION_GUIDE.md` | Plain-language AI response and terminology standard |
 | `docs/INCIDENT_REVIEW.md` | Historical drift findings and prevention controls |
+| `docs/AGENT_CAPABILITIES_MEMORY.md` | Agent provider actions, approval boundaries, retention and durable memory |
 
 Old architecture prompts/specifications that claimed unconfigured Cloudflare resources were removed. Git history remains available when historical context is needed.
 
