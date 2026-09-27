@@ -21,7 +21,7 @@ PRIMARY_AI_MODEL = "@cf/meta/llama-3.3-70b-instruct"
 
 
 # Cloudflare Email Service is the transactional mail transport.
-# internal.operavaglobal.com must be onboarded as an Email Sending subdomain.
+# app.jelvan.pro must be onboarded as an Email Sending subdomain.
 [[send_email]]
 name = "EMAIL"
-allowed_sender_addresses = [ "noreply@internal.operavaglobal.com" ]
+allowed_sender_addresses = [ "notification@app.jelvan.pro" ]
