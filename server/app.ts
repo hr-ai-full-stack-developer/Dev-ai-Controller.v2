@@ -41,6 +41,7 @@ import {
   getAdminUserProfile,
 } from './auth.js';
 import { operavaEmailTemplate, sendTransactionalEmail } from './services/emailDeliveryService.js';
+import { notifyAdminAccountEvent } from './services/accountNotificationService.js';
 import {
   listPlatformAgents,
   getPlatformAgent,
@@ -219,14 +220,18 @@ export function createApp() {
     const config = getAdminAuthConfig();
     res.json({ success: true, configured: isAdminAuthConfigured(), fields: { email: Boolean(config.email), password: Boolean(config.password), jwtKey: Boolean(config.jwtKey) } });
   });
-  app.post('/api/auth/login', (req, res) => {
+  app.post('/api/auth/login', async (req, res) => {
     if (!isAdminAuthConfigured()) return res.status(503).json({ success: false, error: 'Administrator sign-in has not been configured on the server.' });
-    if (!validateAdminCredentials(req.body.email, req.body.password)) return res.status(401).json({ success: false, error: 'Email or password is incorrect.' });
+    if (!validateAdminCredentials(req.body.email, req.body.password)) {
+      void notifyAdminAccountEvent('login_failed', 'An unsuccessful sign-in attempt was made against your Dev’ai Controller administrator account. No password, token, or verification code is included in this notice.');
+      return res.status(401).json({ success: false, error: 'Email or password is incorrect.' });
+    }
     const user = getAdminUserProfile();
     const token = createAdminJwt({ id: user.id, email: user.email, role: user.role });
     const secure = req.secure || req.headers['x-forwarded-proto'] === 'https';
     res.cookie('devai_session', token, { httpOnly: true, secure, sameSite: 'strict', path: '/', ...(req.body.rememberMe ? { maxAge: 86400000 * 7 } : {}) });
     res.json({ success: true, user });
+    void notifyAdminAccountEvent('login_success', 'Your Dev’ai Controller administrator account was signed in successfully. If this was not you, review your account and deployment credentials immediately.');
   });
   app.post('/api/auth/logout', (req, res) => {
     res.clearCookie('devai_session', { path: '/' });
@@ -256,6 +261,7 @@ export function createApp() {
         text: `Your OPERAVA verification code is ${otp}. It expires at ${new Date(expiresAt).toISOString()}.`,
       });
       emailOtpRequests.set(requested, Date.now());
+      void createNotification({ service: 'cloudflare', type: 'email_sent', title: 'Verification code sent', message: 'A one-time verification code was accepted by Cloudflare Email Service.', status: 'sent', recipient: requested, sourceId: delivery.id ? `email:${delivery.id}` : undefined, metadata: { channel: 'email', event: 'otp_requested' } });
       return res.json({ ...accepted, delivery: { provider: delivery.provider } });
     } catch (err: any) {
       console.error('Email OTP delivery failed:', err);
@@ -269,6 +275,7 @@ export function createApp() {
     if (!requested || requested !== adminEmail || !verifyEmailOtp(requested, String(req.body?.otp || ''))) {
       return res.status(401).json({ success: false, verified: false, error: 'Verification code is invalid or expired.' });
     }
+    void notifyAdminAccountEvent('otp_verified', 'A one-time verification code for your Dev’ai Controller administrator account was verified successfully.');
     return res.json({ success: true, verified: true });
   });
 
