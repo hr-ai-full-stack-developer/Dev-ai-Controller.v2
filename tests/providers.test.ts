@@ -115,25 +115,25 @@ test('token encryption fails closed when no encryption secret is configured', as
   }
 });
 
-test('OPERAVA transactional template escapes content and renders verification code', async () => {
-  const { operavaEmailTemplate } = await import('../server/services/emailDeliveryService.js');
-  const html = operavaEmailTemplate({ title: 'Confirm <access>', message: 'Safe & secure', code: '123456' });
-  assert.match(html, /OPERAVA/);
+test('Dev’ai Controller transactional template escapes content and renders verification code', async () => {
+  const { devaiEmailTemplate } = await import('../server/services/emailDeliveryService.js');
+  const html = devaiEmailTemplate({ title: 'Confirm <access>', message: 'Safe & secure', code: '123456' });
+  assert.match(html, /Dev’ai Controller/);
   assert.match(html, /123456/);
   assert.equal(html.includes('Confirm <access>'), false);
   assert.match(html, /Confirm &lt;access&gt;/);
 });
 
-test('transactional email uses only the restricted OPERAVA Cloudflare sender', async () => {
-  const { setCloudflareEmailBinding, sendTransactionalEmail, OPERAVA_EMAIL_FROM } = await import('../server/services/emailDeliveryService.js');
+test('transactional email uses only the restricted Dev’ai Controller Cloudflare sender', async () => {
+  const { setCloudflareEmailBinding, sendTransactionalEmail, DEVAI_EMAIL_FROM } = await import('../server/services/emailDeliveryService.js');
   let captured: any = null;
   setCloudflareEmailBinding({ send: async (message: any) => { captured = message; return { messageId: 'cf-test-1' }; } });
   try {
     const result = await sendTransactionalEmail({ to: 'admin@example.test', from: 'spoof@example.test', subject: 'Test', text: 'Hello', html: '<p>Hello</p>' });
     assert.equal(result.provider, 'cloudflare-email');
     assert.equal(result.id, 'cf-test-1');
-    assert.equal(captured.from, OPERAVA_EMAIL_FROM);
-    assert.equal(captured.from, 'Operava <noreply@internal.operavaglobal.com>');
+    assert.equal(captured.from, DEVAI_EMAIL_FROM);
+    assert.equal(captured.from, 'Dev’ai Controller <notification@app.jelvan.pro>');
   } finally {
     setCloudflareEmailBinding(null);
   }
