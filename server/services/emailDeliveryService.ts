@@ -1,5 +1,10 @@
-import { runtimeEnv } from '../runtimeEnv.js';
-import { sendResendEmail, type SendEmailParams } from './resend.js';
+export interface SendEmailParams {
+  to: string | string[];
+  from?: string;
+  subject: string;
+  html?: string;
+  text?: string;
+}
 
 type EmailBinding = { send(message: { to: string | string[]; from: string; subject: string; html?: string; text?: string; replyTo?: string }): Promise<any> };
 let cloudflareEmail: EmailBinding | null = null;
@@ -39,28 +44,17 @@ export function operavaEmailTemplate(input: { eyebrow?: string; title: string; m
   </table></td></tr></table></body></html>`;
 }
 
-export type DeliveryResult = { provider: 'resend' | 'cloudflare-email'; id?: string; fallbackUsed: boolean };
+export const OPERAVA_EMAIL_FROM = 'Operava <noreply@internal.operavaglobal.com>';
+export type DeliveryResult = { provider: 'cloudflare-email'; id?: string };
 
 export async function sendTransactionalEmail(params: SendEmailParams): Promise<DeliveryResult> {
-  const from = params.from || runtimeEnv('EMAIL_FROM');
-  if (!from) throw new Error('EMAIL_FROM is required for transactional email.');
-  const resendKey = runtimeEnv('RESEND_API_KEY');
-  let resendError: unknown = null;
-
-  if (resendKey) {
-    try {
-      const sent = await sendResendEmail(resendKey, { ...params, from });
-      return { provider: 'resend', id: sent.id, fallbackUsed: false };
-    } catch (error) {
-      resendError = error;
-    }
-  }
-
-  if (cloudflareEmail) {
-    const response = await cloudflareEmail.send({ to: params.to, from, subject: params.subject, html: params.html, text: params.text });
-    return { provider: 'cloudflare-email', id: response?.messageId, fallbackUsed: true };
-  }
-
-  const reason = resendError instanceof Error ? ` Resend failed: ${resendError.message}` : '';
-  throw new Error(`No email delivery provider is available.${reason}`);
+  if (!cloudflareEmail) throw new Error('Cloudflare Email Service binding is not available.');
+  const response = await cloudflareEmail.send({
+    to: params.to,
+    from: OPERAVA_EMAIL_FROM,
+    subject: params.subject,
+    html: params.html,
+    text: params.text,
+  });
+  return { provider: 'cloudflare-email', id: response?.messageId };
 }
