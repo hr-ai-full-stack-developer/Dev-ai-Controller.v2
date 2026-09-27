@@ -1,4 +1,4 @@
-export type ServiceType = 'resend' | 'supabase' | 'github' | 'cloudflare' | 'openai';
+export type ServiceType = 'supabase' | 'github' | 'cloudflare' | 'openai';
 
 export type TokenProvider = 'github' | 'supabase' | 'resend' | 'cloudflare' | 'openai' | 'custom';
 
