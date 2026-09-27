@@ -1169,9 +1169,9 @@ let customerWidgetConfig: CustomerWidgetConfig = {
   agentId: 'agent-customer-01',
   theme: 'auto',
   language: 'en',
-  greeting: 'Hello! I am your AI Support Assistant powered by Cloudflare Workers AI. How can I help you today?',
+  greeting: 'Hello! I am your AI Support Assistant. How can I help you today?',
   knowledgeScope: ['faq', 'policy', 'specs'],
-  embedSnippet: `<script src="https://controller.operava.com/widget.js" data-tenant="${DEFAULT_TENANT_ID}" data-agent="agent-customer-01" async></script>`,
+  embedSnippet: '',
 };
 
 // ============================================================
@@ -1293,15 +1293,9 @@ export function interpretNaturalLanguageAutomation(userPrompt: string): Automati
     scheduleExpression = '31 October 2026 09:00';
   }
 
-  // Determine attached knowledge matches
+  // Knowledge and recipients must be explicitly supplied by the operator; there are no seeded organization records.
   const attached: AttachedKnowledgeItem[] = [];
-  if (promptLower.includes('client') || promptLower.includes('update') || promptLower.includes('email')) {
-    attached.push(knowledgeRepository[0]); // monthly-client-email-v1
-  }
-  attached.push(knowledgeRepository[1]); // company-branding-v2
-  attached.push(knowledgeRepository[2]); // signature-template
-
-  const recipient = emailMatch ? emailMatch[1] : (promptLower.includes('client') ? 'client@operava.com' : '');
+  const recipient = emailMatch ? emailMatch[1] : '';
 
   // Validation Checks
   const checks: ValidationCheckItem[] = [
@@ -1325,14 +1319,14 @@ export function interpretNaturalLanguageAutomation(userPrompt: string): Automati
     },
     {
       item: 'Email Tool Authorized',
-      passed: true,
-      message: 'Resend API provider active with verified sending domain',
+      passed: Boolean(listAgentCapabilities().find((cap) => cap.id === 'resend.email')?.configured),
+      message: listAgentCapabilities().find((cap) => cap.id === 'resend.email')?.configured ? 'Resend credentials are configured; delivery is not verified until send time.' : 'Resend is not configured.',
       category: 'tool',
     },
     {
       item: 'HTML Template Safety',
-      passed: true,
-      message: 'HTML syntax validated with inline styling and zero external script injection',
+      passed: false,
+      message: 'No HTML safety validator is implemented; operator review is required.',
       category: 'template',
     },
   ];
@@ -1365,10 +1359,10 @@ export function interpretNaturalLanguageAutomation(userPrompt: string): Automati
       signature: 'Operations Engineering Team',
       variables: {
         CLIENT_NAME: 'Valued Client',
-        MONTH: monthMatch ? monthMatch[1] : 'October',
-        YEAR: '2026',
+        MONTH: monthMatch ? monthMatch[1] : '',
+        YEAR: '',
       },
-      htmlContent: attached[0]?.content || '<p>Operational update content</p>',
+      htmlContent: attached[0]?.content || '',
     },
     requiresApproval: true,
     approvalStatus: isReady ? 'pending' : 'none',
