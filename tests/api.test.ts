@@ -76,7 +76,7 @@ test('authenticated identity comes from configured environment rather than a UI 
 });
 
 test('agent capabilities report configuration truthfully', async () => {
-  const res = await fetch(baseUrl + '/api/agents/capabilities', { headers: authHeaders });
+  const res = await request('/api/agents/capabilities');
   assert.equal(res.status, 200);
   const body = await res.json();
   assert.equal(body.success, true);
@@ -85,22 +85,19 @@ test('agent capabilities report configuration truthfully', async () => {
 });
 
 test('agent process memory can be retained without automatic expiry', async () => {
-  const create = await fetch(baseUrl + '/api/agents/memory', {
-    method: 'POST', headers: { ...authHeaders, 'content-type': 'application/json' },
-    body: JSON.stringify({ kind: 'process', title: 'Safe repair process', content: 'Inspect, propose, verify, then request approval.', importance: 'important' }),
-  });
+  const create = await request('/api/agents/memory', 'POST', { kind: 'process', title: 'Safe repair process', content: 'Inspect, propose, verify, then request approval.', importance: 'important' });
   assert.equal(create.status, 200);
   const created = await create.json();
   assert.equal(created.memory.kind, 'process');
   assert.equal(created.memory.expiresAt, undefined);
-  const list = await fetch(baseUrl + '/api/agents/memory?kind=process', { headers: authHeaders });
+  const list = await request('/api/agents/memory?kind=process');
   assert.equal(list.status, 200);
   const listed = await list.json();
   assert.ok(listed.memories.some((m: any) => m.title === 'Safe repair process'));
 });
 
 test('public auth readiness reports required fields without exposing secrets', async () => {
-  const res = await fetch(baseUrl + '/api/auth/readiness');
+  const res = await request('/api/auth/readiness', 'GET', undefined, false);
   assert.equal(res.status, 200);
   const body = await res.json();
   assert.equal(body.success, true);
