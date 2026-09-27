@@ -15,14 +15,7 @@ interface AdminProtectiveWrapperProps {
   children: React.ReactNode;
 }
 
-const defaultUser: SupabaseAuthUser = {
-  id: 'usr-sb-7782194',
-  email: 'admin@operava.com',
-  name: 'Alex Rivera',
-  role: 'Developer / Operator',
-  sessionValid: true,
-  lastSignInAt: new Date().toISOString(),
-};
+const defaultUser: SupabaseAuthUser = { id: '', email: '', name: 'Operator', role: 'Developer / Operator', sessionValid: false, lastSignInAt: '' };
 
 export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
