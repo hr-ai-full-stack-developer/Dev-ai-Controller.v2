@@ -9,7 +9,6 @@ import {
   Server,
   Database,
   GitBranch,
-  Mail,
   Cpu,
   Sparkles,
   Zap,
@@ -54,8 +53,6 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
         return <Database className="h-5 w-5 text-emerald-500" />;
       case 'github':
         return <GitBranch className="h-5 w-5 text-purple-500" />;
-      case 'resend':
-        return <Mail className="h-5 w-5 text-cyan-500" />;
       case 'openai':
         return <Cpu className="h-5 w-5 text-blue-500" />;
     }
