@@ -55,7 +55,6 @@ export default function App() {
     cloudflare: unknownService('cloudflare', 'Cloudflare', 'Cloudflare API and Workers AI'),
     supabase: unknownService('supabase', 'Supabase', 'Optional database persistence'),
     github: unknownService('github', 'GitHub', 'Repository API connection'),
-    resend: unknownService('resend', 'Resend', 'Transactional email provider'),
     openai: unknownService('openai', 'OpenAI (Fallback)', 'Optional fallback AI provider', true),
   });
 
