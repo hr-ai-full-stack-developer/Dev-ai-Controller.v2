@@ -46,64 +46,17 @@ export default function App() {
     lastSignInAt: '',
   });
 
-  // Services Status Data
+  // Service cards start unknown/offline until the authenticated live status check returns.
+  const unknownService = (id: ServiceType, name: string, role: string, isFallback = false): ServiceStatusInfo => ({
+    id, name, role, status: 'offline', latencyMs: 0, lastChecked: '', version: '',
+    details: 'Status has not been checked yet.', features: [], ...(isFallback ? { isFallback: true } : {}),
+  });
   const [services, setServices] = useState<Record<ServiceType, ServiceStatusInfo>>({
-    cloudflare: {
-      id: 'cloudflare',
-      name: 'Cloudflare',
-      role: 'Primary Runtime, Edge APIs & Cloudflare AI',
-      status: 'offline',
-      latencyMs: 22,
-      lastChecked: new Date().toISOString(),
-      version: 'Workers v2026.3',
-      details: 'Status has not been checked yet.',
-      features: ['Serverless Runtime', 'Cloudflare Workers AI', 'Request Routing', 'Zero-Trust Secrets'],
-    },
-    supabase: {
-      id: 'supabase',
-      name: 'Supabase',
-      role: 'Authentication & Central Database',
-      status: 'offline',
-      latencyMs: 27,
-      lastChecked: new Date().toISOString(),
-      version: 'PostgreSQL 15.6',
-      details: 'Optional Supabase persistence status has not been checked yet.',
-      features: ['Supabase Auth', 'PostgreSQL Database', 'Row Level Security', 'Audit Trail Storage'],
-    },
-    github: {
-      id: 'github',
-      name: 'GitHub',
-      role: 'Source Code, Commits & PR Automation',
-      status: 'offline',
-      latencyMs: 38,
-      lastChecked: new Date().toISOString(),
-      version: 'REST API v3',
-      details: 'GitHub integration status has not been checked yet.',
-      features: ['Repository Inspection', 'Source Code Analysis', 'Pull Request Automation', 'Commit Verification'],
-    },
-    resend: {
-      id: 'resend',
-      name: 'Resend',
-      role: 'Transactional Email & Notifications',
-      status: 'offline',
-      latencyMs: 34,
-      lastChecked: new Date().toISOString(),
-      version: 'Resend API v1',
-      details: 'Resend integration status has not been checked yet.',
-      features: ['Transactional Email', 'Deployment Notifications', 'System Alerts', 'Batch Email Delivery'],
-    },
-    openai: {
-      id: 'openai',
-      name: 'OpenAI (Fallback)',
-      role: 'Secondary / Fallback AI Provider',
-      status: 'offline',
-      latencyMs: 44,
-      lastChecked: new Date().toISOString(),
-      version: 'gpt-4o-mini',
-      details: 'Optional fallback provider status has not been checked yet.',
-      isFallback: true,
-      features: ['Secondary Fallback AI', 'Automatic Failover', 'Zero-Downtime Reasoning', 'Model Redundancy'],
-    },
+    cloudflare: unknownService('cloudflare', 'Cloudflare', 'Cloudflare API and Workers AI'),
+    supabase: unknownService('supabase', 'Supabase', 'Optional database persistence'),
+    github: unknownService('github', 'GitHub', 'Repository API connection'),
+    resend: unknownService('resend', 'Resend', 'Transactional email provider'),
+    openai: unknownService('openai', 'OpenAI (Fallback)', 'Optional fallback AI provider', true),
   });
 
   const [systemSummary, setSystemSummary] = useState({
