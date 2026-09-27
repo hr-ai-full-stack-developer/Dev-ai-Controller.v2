@@ -1221,7 +1221,7 @@ export const AgentsPlatform: React.FC = () => {
                   type="text"
                   value={naturalLanguagePrompt}
                   onChange={(e) => setNaturalLanguagePrompt(e.target.value)}
-                  placeholder="e.g. Prepare an email draft for name@example.com with subject \"Monthly update\""
+                  placeholder={`e.g. Prepare an email draft for name@example.com with subject "Monthly update"`}
                   className="flex-1 px-3.5 py-2 text-xs rounded-xl bg-[#f8f9fb] dark:bg-[#1f232c] border border-[#e2e4e9] dark:border-[#2e333d] text-[#1a1d24] dark:text-[#f0f3f6] focus:outline-hidden focus:ring-2 focus:ring-purple-500"
                 />
                 <button
