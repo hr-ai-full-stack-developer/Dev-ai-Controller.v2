@@ -16,6 +16,7 @@ import { getLLMDocs, refreshDoc } from './services/llmsDocs.js';
 import { generateCompletion } from './services/aiProvider.js';
 import { executeAiAction, cleanResponseText } from './aiRouter.js';
 import { rememberAgentMemory, listAgentMemory, isDurableAgentMemoryConfigured } from './services/agentMemoryService.js';
+import { listAgentCapabilities } from './services/agentCapabilityService.js';
 import {
   getWorkerAgentConfig,
   updateWorkerAgentConfig,
@@ -389,6 +390,10 @@ export function createApp() {
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
+  });
+
+  app.get('/api/agents/capabilities', (_req, res) => {
+    res.json({ success: true, capabilities: listAgentCapabilities() });
   });
 
   // Durable agent memory: processes can be permanent; normal episodic/knowledge memory expires by policy.
