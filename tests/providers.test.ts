@@ -90,3 +90,27 @@ test('developer agent describes verification without claiming unrun compiler or 
   assert.deepEqual(verify!.toolDependencies, ['github.read']);
   assert.doesNotMatch(verify!.description, /executes compiler/i);
 });
+
+test('agent platform does not advertise fake MCP connections or seeded organization knowledge', async () => {
+  const platform = await import('../server/services/agentPlatformService.js');
+  assert.deepEqual(platform.listMcpServers(), []);
+  assert.deepEqual(platform.listKnowledgeItems(), []);
+  const toolIds = platform.listTools().map((tool) => tool.toolId);
+  assert.equal(toolIds.includes('figma.read'), false);
+  assert.equal(toolIds.includes('task.schedule'), false);
+  assert.equal(toolIds.includes('email.schedule'), false);
+});
+
+test('token encryption fails closed when no encryption secret is configured', async () => {
+  const { setWorkerEnv } = await import('../server/runtimeEnv.js');
+  const { encryptToken } = await import('../server/crypto.js');
+  const previous = process.env.WORKER_SECRET;
+  delete process.env.WORKER_SECRET;
+  setWorkerEnv({});
+  try {
+    assert.throws(() => encryptToken('sensitive-token'), /WORKER_SECRET is required/);
+  } finally {
+    setWorkerEnv(null);
+    if (previous) process.env.WORKER_SECRET = previous;
+  }
+});
