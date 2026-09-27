@@ -9,3 +9,18 @@ coverage/
 
 .wrangler/
 .dev.vars*
+
+# Editor / OS / temporary artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+*.temp
+Thumbs.db
+
+# Test / tooling caches
+.nyc_output/
+.cache/
+.vite/
+*.tsbuildinfo
