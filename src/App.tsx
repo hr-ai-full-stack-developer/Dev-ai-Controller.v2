@@ -38,12 +38,12 @@ export default function App() {
 
   // Authenticated Supabase User (read-only session display)
   const [currentUser, setCurrentUser] = useState<SupabaseAuthUser>({
-    id: 'usr-sb-7782194',
-    email: 'secured.jelvan@gmail.com',
-    name: 'Jelvan',
+    id: '',
+    email: '',
+    name: 'Operator',
     role: 'Developer / Operator',
-    sessionValid: true,
-    lastSignInAt: new Date(Date.now() - 1000 * 60 * 240).toISOString(),
+    sessionValid: false,
+    lastSignInAt: '',
   });
 
   // Services Status Data
@@ -56,7 +56,7 @@ export default function App() {
       latencyMs: 22,
       lastChecked: new Date().toISOString(),
       version: 'Workers v2026.3',
-      details: 'Workers runtime, request routing, and Cloudflare AI healthy.',
+      details: 'Status has not been checked yet.',
       features: ['Serverless Runtime', 'Cloudflare Workers AI', 'Request Routing', 'Zero-Trust Secrets'],
     },
     supabase: {
@@ -67,7 +67,7 @@ export default function App() {
       latencyMs: 27,
       lastChecked: new Date().toISOString(),
       version: 'PostgreSQL 15.6',
-      details: 'Supabase Auth session validator and PostgreSQL database connected with RLS policies.',
+      details: 'Optional Supabase persistence status has not been checked yet.',
       features: ['Supabase Auth', 'PostgreSQL Database', 'Row Level Security', 'Audit Trail Storage'],
     },
     github: {
@@ -78,7 +78,7 @@ export default function App() {
       latencyMs: 38,
       lastChecked: new Date().toISOString(),
       version: 'REST API v3',
-      details: 'GitHub REST API connected with standard repository access & code inspection.',
+      details: 'GitHub integration status has not been checked yet.',
       features: ['Repository Inspection', 'Source Code Analysis', 'Pull Request Automation', 'Commit Verification'],
     },
     resend: {
@@ -89,7 +89,7 @@ export default function App() {
       latencyMs: 34,
       lastChecked: new Date().toISOString(),
       version: 'Resend API v1',
-      details: 'Transactional email delivery pipeline verified. Ready for deployment and agent alerts.',
+      details: 'Resend integration status has not been checked yet.',
       features: ['Transactional Email', 'Deployment Notifications', 'System Alerts', 'Batch Email Delivery'],
     },
     openai: {
@@ -100,18 +100,18 @@ export default function App() {
       latencyMs: 44,
       lastChecked: new Date().toISOString(),
       version: 'gpt-4o-mini',
-      details: 'Standby fallback provider available. Ready to seamlessly take over if primary Cloudflare AI throttles.',
+      details: 'Optional fallback provider status has not been checked yet.',
       isFallback: true,
       features: ['Secondary Fallback AI', 'Automatic Failover', 'Zero-Downtime Reasoning', 'Model Redundancy'],
     },
   });
 
   const [systemSummary, setSystemSummary] = useState({
-    overallStatus: 'all_operational' as const,
-    primaryAiProvider: 'Cloudflare Workers AI (@cf/meta/llama-3.3-70b)',
-    fallbackAiProvider: 'OpenAI (gpt-4o-mini)',
-    totalActiveDeployments: 5,
-    securedSecretsCount: 5,
+    overallStatus: 'action_required' as 'all_operational' | 'degraded_performance' | 'action_required',
+    primaryAiProvider: 'Cloudflare Workers AI',
+    fallbackAiProvider: 'Not configured',
+    totalActiveDeployments: 0,
+    securedSecretsCount: 0,
     timestamp: new Date().toISOString(),
   });
 
