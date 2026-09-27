@@ -41,24 +41,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   setActiveTab,
   currentUser,
-  totalActiveDeployments = 5,
+  totalActiveDeployments = 0,
 }) => {
   const { logout } = useAdminAuth();
 
   // Dev'ai Controller Original Features (styled with mandatory theme & colors)
   const controllerNavItems = [
-    { id: 'agents', label: 'AGENTS Platform', icon: Zap, badge: 'Active' },
-    { id: 'chat', label: 'Dev’ai AI Assistant', icon: Sparkles },
-    { id: 'worker', label: 'Worker Agent (Multi-Channel)', icon: Bot },
-    { id: 'coding', label: 'Coding Agent (Drive)', icon: Terminal },
-    { id: 'deployments', label: 'Deployments Monitor', icon: Globe, count: totalActiveDeployments },
-    { id: 'status', label: 'Services Status', icon: Activity },
+    { id: 'agents', label: 'Agents', icon: Zap },
+    { id: 'chat', label: 'Dev’ai', icon: Sparkles },
+    { id: 'worker', label: 'Worker Agent', icon: Bot },
+    { id: 'coding', label: 'Coding Agent', icon: Terminal },
+    { id: 'deployments', label: 'Deployments', icon: Globe, count: totalActiveDeployments },
+    { id: 'status', label: 'Services', icon: Activity },
     { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'knowledge', label: 'Knowledge Center', icon: HelpCircle },
+    { id: 'knowledge', label: 'Knowledge', icon: HelpCircle },
     { id: 'chathistory', label: 'Chat Sessions', icon: Clock },
-    { id: 'logs', label: 'Audit Trail Logs', icon: History },
-    { id: 'docs', label: 'LLM Docs Reference', icon: FileText },
-    { id: 'export', label: 'Deploy Worker Kit', icon: Box },
+    { id: 'logs', label: 'Audit Log', icon: History },
+    { id: 'docs', label: 'Reference Docs', icon: FileText },
+    { id: 'export', label: 'Export Kit', icon: Box },
   ];
 
   const handleSelectTab = (tabId: string) => {
@@ -133,18 +133,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Quick Stats Box (Exact matching Dasboard_mandatory_design.html style) */}
           <div className="rounded-[14px] bg-[#f8f5e9] border border-[#e7e5d8] p-[10px]">
             <div className="text-[11px] font-semibold text-[#5c5a54]">System Stats</div>
-            <div className="mt-[8px] grid grid-cols-3 gap-[6px]">
+            <div className="mt-[8px]">
               <div className="bg-[#fcfaf4] rounded-[10px] border border-[#e7e5d8] p-[8px]">
                 <div className="text-[16px] font-semibold leading-none text-[#1a1a1a]">{totalActiveDeployments}</div>
-                <div className="text-[10px] text-[#9a9892] mt-[3px]">Deploys</div>
-              </div>
-              <div className="bg-[#fcfaf4] rounded-[10px] border border-[#e7e5d8] p-[8px]">
-                <div className="text-[16px] font-semibold leading-none text-[#1a1a1a]">5</div>
-                <div className="text-[10px] text-[#9a9892] mt-[3px]">Services</div>
-              </div>
-              <div className="bg-[#fcfaf4] rounded-[10px] border border-[#e7e5d8] p-[8px]">
-                <div className="text-[16px] font-semibold leading-none text-[#1a1a1a]">3</div>
-                <div className="text-[10px] text-[#9a9892] mt-[3px]">AI Docs</div>
+                <div className="text-[10px] text-[#9a9892] mt-[3px]">Deployments found</div>
               </div>
             </div>
           </div>
@@ -158,10 +150,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[12px] font-medium leading-[1.1] truncate text-[#1a1a1a]">
-                {currentUser.name || 'Jelvan'}
+                {currentUser.name || 'Operator'}
               </div>
               <div className="text-[10.5px] text-[#8a8883] leading-[1.1] truncate">
-                {currentUser.role || 'Operator • Dev'}
+                {currentUser.role || 'Operator'}
               </div>
             </div>
           </div>
@@ -239,8 +231,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {currentUser.name ? currentUser.name.slice(0, 2).toUpperCase() : 'OP'}
             </div>
             <div className="flex-1">
-              <div className="text-[12px] font-medium text-[#1a1a1a]">{currentUser.name || 'Jelvan'}</div>
-              <div className="text-[11px] text-[#8a8883]">{currentUser.role || 'Operator • Dev'}</div>
+              <div className="text-[12px] font-medium text-[#1a1a1a]">{currentUser.name || 'Operator'}</div>
+              <div className="text-[11px] text-[#8a8883]">{currentUser.role || 'Operator'}</div>
             </div>
             <button
               onClick={logout}
