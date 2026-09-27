@@ -22,6 +22,7 @@ Use this checklist with [DEPLOYMENT.md](DEPLOYMENT.md). Items describe the curre
 - [ ] `ADMIN_PASSWORD` is configured as a Worker secret.
 - [ ] `ADMIN_JWT_KEY` is configured as a Worker secret.
 - [ ] GitHub Actions has `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+- [ ] GitHub Actions has `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_JWT_KEY`; the deploy job provisions them to the Worker.
 
 ## Optional providers
 
@@ -39,6 +40,7 @@ An unchecked optional provider must be shown as unavailable/offline, never simul
 ## Authentication and API smoke test
 
 - [ ] `GET /api/health` returns HTTP 200.
+- [ ] `GET /api/auth/readiness` returns `configured: true` with email/password/jwtKey all true.
 - [ ] Anonymous `GET /api/deployments` returns HTTP 401.
 - [ ] Invalid credentials return HTTP 401 and do not set a session cookie.
 - [ ] Valid credentials set an HTTP-only session cookie.
