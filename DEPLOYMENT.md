@@ -44,6 +44,11 @@ Repository Actions secrets:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `ADMIN_JWT_KEY`
+
+The main-branch deploy job provisions the three admin values as Cloudflare Worker secrets before deploying. They are never written to `wrangler.toml` or the browser bundle.
 
 On pull requests, `.github/workflows/deploy.yml` installs from the lockfile, typechecks, runs API tests, builds the web client and performs a Wrangler dry run. On `main`, deployment runs only after verification succeeds and after both Cloudflare deployment credentials are present.
 
@@ -79,7 +84,8 @@ npm start
 4. Verify the Workers AI `AI` binding in `wrangler.toml`.
 5. Add GitHub Actions deployment credentials to repository secrets.
 6. Merge only after PR verification is green.
-7. Verify `/api/health`, sign-in, `/api/auth/verify-session`, and the authenticated dashboards after deployment.
+7. Verify `/api/health` and `/api/auth/readiness`; readiness must report all three auth fields configured.
+8. Sign in, verify `/api/auth/verify-session`, and inspect the authenticated dashboards.
 
 ## Security invariants
 
