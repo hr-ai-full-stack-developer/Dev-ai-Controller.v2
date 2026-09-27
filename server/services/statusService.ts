@@ -1,6 +1,5 @@
 import type { ServiceStatusInfo, ServiceType } from '../../src/types/index.js';
 import { testGitHubToken } from './github.js';
-import { testResendToken } from './resend.js';
 import { testSupabaseConnection } from './supabaseService.js';
 import { testCloudflareConnection } from './cloudflareService.js';
 import { runtimeEnv } from '../runtimeEnv.js';
@@ -68,22 +67,6 @@ export async function getServicesStatus(): Promise<{
     features: ghRes.valid ? ['Authenticated GitHub API access'] : [],
   };
 
-  // 4. Resend Check
-  const reStart = Date.now();
-  const reRes = await testResendToken(runtimeEnv('RESEND_API_KEY'));
-  const reLatency = Date.now() - reStart;
-  const reStatus: ServiceStatusInfo = {
-    id: 'resend',
-    name: 'Resend',
-    role: 'Transactional Email & Notifications',
-    status: reRes.valid ? 'operational' : 'offline',
-    latencyMs: reLatency,
-    lastChecked: timestamp,
-    version: 'Resend API v1',
-    details: reRes.message || 'Resend connection status unavailable.',
-    features: reRes.valid ? ['Resend API authenticated'] : [],
-  };
-
   // 5. OpenAI Check (Fallback Provider)
   const openAiKey = runtimeEnv('OPENAI_API_KEY');
   const openAiStatus: ServiceStatusInfo = {
@@ -101,7 +84,7 @@ export async function getServicesStatus(): Promise<{
     features: openAiKey ? ['Fallback credential configured'] : [],
   };
 
-  const allOperational = [cfStatus, sbStatus, ghStatus, reStatus].every(
+  const allOperational = [cfStatus, sbStatus, ghStatus].every(
     (s) => s.status === 'operational'
   );
 
@@ -110,7 +93,6 @@ export async function getServicesStatus(): Promise<{
       cloudflare: cfStatus,
       supabase: sbStatus,
       github: ghStatus,
-      resend: reStatus,
       openai: openAiStatus,
     },
     systemSummary: {
@@ -118,7 +100,7 @@ export async function getServicesStatus(): Promise<{
       primaryAiProvider: cfRes.valid ? 'Cloudflare Workers AI' : 'Not verified',
       fallbackAiProvider: openAiKey ? 'OpenAI configured; not probed' : 'Not configured',
       totalActiveDeployments: 0,
-      securedSecretsCount: ['CLOUDFLARE_API_TOKEN', 'SUPABASE_SERVICE_ROLE_KEY', 'GITHUB_TOKEN', 'RESEND_API_KEY', 'OPENAI_API_KEY'].filter(k => Boolean(runtimeEnv(k))).length,
+      securedSecretsCount: ['CLOUDFLARE_API_TOKEN', 'SUPABASE_SERVICE_ROLE_KEY', 'GITHUB_TOKEN', 'OPENAI_API_KEY'].filter(k => Boolean(runtimeEnv(k))).length,
       timestamp,
     },
   };
