@@ -2,11 +2,17 @@ import crypto from 'crypto';
 import type { SupabaseAuthUser } from '../src/types/index.js';
 
 // Admin credentials configured strictly via environment variables
-export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
-export const ADMIN_JWT_KEY = process.env.ADMIN_JWT_KEY || process.env.ADMIN_WJT_KEY || '';
-/** @deprecated Use ADMIN_JWT_KEY. */
-export const ADMIN_WJT_KEY = ADMIN_JWT_KEY;
+export function getAdminAuthConfig() {
+  return {
+    email: process.env.ADMIN_EMAIL || '',
+    password: process.env.ADMIN_PASSWORD || '',
+    jwtKey: process.env.ADMIN_JWT_KEY || process.env.ADMIN_WJT_KEY || '',
+  };
+}
+export const isAdminAuthConfigured = () => {
+  const config = getAdminAuthConfig();
+  return Boolean(config.email && config.password && config.jwtKey);
+};
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
@@ -53,7 +59,7 @@ export function base32Decode(str: string): Buffer {
 }
 
 /**
- * Derives a deterministic 160-bit (20-byte) Authenticator App secret from ADMIN_WJT_KEY
+ * Derives a deterministic 160-bit (20-byte) Authenticator App secret from getAdminAuthConfig().jwtKey
  */
 export function getAuthenticatorSecret(): {
   secret: string;
@@ -61,11 +67,11 @@ export function getAuthenticatorSecret(): {
   issuer: string;
   account: string;
 } {
-  const hash = crypto.createHmac('sha256', 'authenticator-seed').update(ADMIN_WJT_KEY).digest();
+  const hash = crypto.createHmac('sha256', 'authenticator-seed').update(getAdminAuthConfig().jwtKey).digest();
   const secretBytes = hash.subarray(0, 20);
   const secret = base32Encode(secretBytes);
   const issuer = 'DevaiController';
-  const account = ADMIN_EMAIL;
+  const account = getAdminAuthConfig().email;
   const label = encodeURIComponent(`${issuer}:${account}`);
   const otpauthUrl = `otpauth://totp/${label}?secret=${secret}&issuer=${encodeURIComponent(
     issuer
@@ -121,14 +127,14 @@ export function verifyAuthenticatorOtp(candidateOtp: string): boolean {
 }
 
 /**
- * Generates an Email OTP using ADMIN_WJT_KEY (5-minute sliding window)
+ * Generates an Email OTP using getAdminAuthConfig().jwtKey (5-minute sliding window)
  */
 export function generateEmailOtp(
-  email: string = ADMIN_EMAIL
+  email: string = getAdminAuthConfig().email
 ): { otp: string; expiresAt: number } {
   const now = Date.now();
   const step = Math.floor(now / (1000 * 300)); // 300s = 5 minutes
-  const hmac = crypto.createHmac('sha256', ADMIN_WJT_KEY);
+  const hmac = crypto.createHmac('sha256', getAdminAuthConfig().jwtKey);
   hmac.update(`email-otp:${email.toLowerCase().trim()}:${step}`);
   const hash = hmac.digest('hex');
   const num = (parseInt(hash.slice(0, 8), 16) % 900000) + 100000;
@@ -138,7 +144,7 @@ export function generateEmailOtp(
 }
 
 /**
- * Verifies Email OTP against ADMIN_WJT_KEY with a sliding window
+ * Verifies Email OTP against getAdminAuthConfig().jwtKey with a sliding window
  */
 export function verifyEmailOtp(email: string, candidateOtp: string): boolean {
   if (!candidateOtp) return false;
@@ -149,7 +155,7 @@ export function verifyEmailOtp(email: string, candidateOtp: string): boolean {
   const currentStep = Math.floor(now / (1000 * 300));
 
   for (const step of [currentStep, currentStep - 1, currentStep + 1]) {
-    const hmac = crypto.createHmac('sha256', ADMIN_WJT_KEY);
+    const hmac = crypto.createHmac('sha256', getAdminAuthConfig().jwtKey);
     hmac.update(`email-otp:${email.toLowerCase().trim()}:${step}`);
     const hash = hmac.digest('hex');
     const num = (parseInt(hash.slice(0, 8), 16) % 900000) + 100000;
@@ -176,10 +182,11 @@ export function verifyAdminOtp(
  * Validates admin email and password credentials
  */
 export function validateAdminCredentials(email?: string, password?: string): boolean {
-  if (!ADMIN_PASSWORD || !email || !password) return false;
+  const config = getAdminAuthConfig();
+  if (!config.email || !config.password || !email || !password) return false;
   const given = crypto.createHash('sha256').update(password).digest();
-  const expected = crypto.createHash('sha256').update(ADMIN_PASSWORD).digest();
-  return email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && crypto.timingSafeEqual(given, expected);
+  const expected = crypto.createHash('sha256').update(config.password).digest();
+  return email.trim().toLowerCase() === config.email.toLowerCase() && crypto.timingSafeEqual(given, expected);
 }
 
 /**
@@ -205,7 +212,7 @@ function base64UrlDecode(str: string): string {
 }
 
 /**
- * Creates a signed JWT using ADMIN_WJT_KEY
+ * Creates a signed JWT using getAdminAuthConfig().jwtKey
  */
 export function createAdminJwt(payload: Record<string, any>): string {
   const header = { alg: 'HS256', typ: 'JWT' };
@@ -217,7 +224,7 @@ export function createAdminJwt(payload: Record<string, any>): string {
   };
   const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload));
   const signature = crypto
-    .createHmac('sha256', ADMIN_WJT_KEY)
+    .createHmac('sha256', getAdminAuthConfig().jwtKey)
     .update(`${encodedHeader}.${encodedPayload}`)
     .digest('base64')
     .replace(/=/g, '')
@@ -228,16 +235,16 @@ export function createAdminJwt(payload: Record<string, any>): string {
 }
 
 /**
- * Verifies a JWT signed by ADMIN_WJT_KEY
+ * Verifies a JWT signed by getAdminAuthConfig().jwtKey
  */
 export function verifyAdminJwt(token: string): any | null {
-  if (!token || !ADMIN_WJT_KEY) return null;
+  if (!token || !getAdminAuthConfig().jwtKey) return null;
   const parts = token.split('.');
   if (parts.length !== 3) return null;
 
   const [encodedHeader, encodedPayload, signature] = parts;
   const expectedSignature = crypto
-    .createHmac('sha256', ADMIN_WJT_KEY)
+    .createHmac('sha256', getAdminAuthConfig().jwtKey)
     .update(`${encodedHeader}.${encodedPayload}`)
     .digest('base64')
     .replace(/=/g, '')
@@ -248,7 +255,7 @@ export function verifyAdminJwt(token: string): any | null {
 
   try {
     const payload = JSON.parse(base64UrlDecode(encodedPayload));
-    if (JSON.parse(base64UrlDecode(encodedHeader)).alg !== 'HS256' || payload.email !== ADMIN_EMAIL || !Number.isFinite(payload.exp) || payload.exp <= Math.floor(Date.now() / 1000)) {
+    if (JSON.parse(base64UrlDecode(encodedHeader)).alg !== 'HS256' || payload.email !== getAdminAuthConfig().email || !Number.isFinite(payload.exp) || payload.exp <= Math.floor(Date.now() / 1000)) {
       return null;
     }
     return payload;
@@ -263,7 +270,7 @@ export function verifyAdminJwt(token: string): any | null {
 export function getAdminUserProfile(): SupabaseAuthUser {
   return {
     id: 'usr-sb-7782194',
-    email: ADMIN_EMAIL,
+    email: getAdminAuthConfig().email,
     name: 'Jelvan',
     role: 'Developer / Operator',
     sessionValid: true,

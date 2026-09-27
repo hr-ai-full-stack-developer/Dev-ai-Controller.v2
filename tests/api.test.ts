@@ -98,3 +98,14 @@ test('agent process memory can be retained without automatic expiry', async () =
   const listed = await list.json();
   assert.ok(listed.memories.some((m: any) => m.title === 'Safe repair process'));
 });
+
+test('public auth readiness reports required fields without exposing secrets', async () => {
+  const res = await fetch(baseUrl + '/api/auth/readiness');
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.success, true);
+  assert.equal(body.configured, true);
+  assert.deepEqual(body.fields, { email: true, password: true, jwtKey: true });
+  assert.equal(JSON.stringify(body).includes(process.env.ADMIN_PASSWORD!), false);
+  assert.equal(JSON.stringify(body).includes(process.env.ADMIN_JWT_KEY!), false);
+});

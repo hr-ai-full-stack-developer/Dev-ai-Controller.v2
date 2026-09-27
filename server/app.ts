@@ -28,9 +28,8 @@ import {
   generateCloudflareWorkerExport,
 } from './services/workerAgentService.js';
 import {
-  ADMIN_EMAIL,
-  ADMIN_PASSWORD,
-  ADMIN_WJT_KEY,
+  getAdminAuthConfig,
+  isAdminAuthConfigured,
   generateEmailOtp,
   verifyEmailOtp,
   verifyAuthenticatorOtp,
@@ -85,7 +84,7 @@ export function createApp() {
       const origin = new URL(req.headers.origin);
       if (origin.host !== req.headers.host) return res.status(403).json({ success: false, error: 'Cross-origin request rejected.' });
     }
-    const publicRoutes = ['/api/health', '/api/auth/login', '/api/auth/reset-password', '/v1/widget/chat'];
+    const publicRoutes = ['/api/health', '/api/auth/login', '/api/auth/readiness', '/api/auth/reset-password', '/v1/widget/chat'];
     if (publicRoutes.includes(req.path)) return next();
     return requireAdminAuth(req, res, next);
   });
@@ -104,7 +103,7 @@ export function createApp() {
         supabase: Boolean(process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY)),
         openaiFallback: Boolean(process.env.OPENAI_API_KEY),
       },
-      adminConfigured: Boolean(ADMIN_EMAIL && ADMIN_PASSWORD && ADMIN_WJT_KEY),
+      adminConfigured: isAdminAuthConfigured(),
     });
   });
 
@@ -190,7 +189,7 @@ export function createApp() {
     }
   });
 
-  // 5. Authentication & Login (ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_WJT_KEY for OTP)
+  // 5. Authentication & Login (credentials resolved at request time for Cloudflare bindings)
   // Provides Authenticator App setup configuration
   app.get('/api/auth/authenticator-setup', (req, res) => {
     try {
@@ -216,8 +215,12 @@ export function createApp() {
   app.get('/api/auth/me', (req, res) => {
     res.json({ success: true, user: getAdminUserProfile() });
   });
+  app.get('/api/auth/readiness', (_req, res) => {
+    const config = getAdminAuthConfig();
+    res.json({ success: true, configured: isAdminAuthConfigured(), fields: { email: Boolean(config.email), password: Boolean(config.password), jwtKey: Boolean(config.jwtKey) } });
+  });
   app.post('/api/auth/login', (req, res) => {
-    if (!ADMIN_PASSWORD || !ADMIN_WJT_KEY) return res.status(503).json({ success: false, error: 'Administrator sign-in has not been configured.' });
+    if (!isAdminAuthConfigured()) return res.status(503).json({ success: false, error: 'Administrator sign-in has not been configured on the server.' });
     if (!validateAdminCredentials(req.body.email, req.body.password)) return res.status(401).json({ success: false, error: 'Email or password is incorrect.' });
     const user = getAdminUserProfile();
     const token = createAdminJwt({ id: user.id, email: user.email, role: user.role });
