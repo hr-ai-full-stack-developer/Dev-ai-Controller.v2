@@ -17,7 +17,7 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char] || char));
 }
 
-export function operavaEmailTemplate(input: { eyebrow?: string; title: string; message: string; code?: string; actionLabel?: string; actionUrl?: string }) {
+export function devaiEmailTemplate(input: { eyebrow?: string; title: string; message: string; code?: string; actionLabel?: string; actionUrl?: string }) {
   const title = escapeHtml(input.title);
   const message = escapeHtml(input.message).replace(/\n/g, '<br/>');
   const code = input.code ? escapeHtml(input.code) : '';
@@ -28,8 +28,8 @@ export function operavaEmailTemplate(input: { eyebrow?: string; title: string; m
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden">
     <tr><td style="height:5px;background:linear-gradient(90deg,#7c3aed,#f97316)"></td></tr>
     <tr><td style="padding:34px 36px 16px">
-      <div style="font-size:20px;font-weight:800;letter-spacing:.08em">OPERAVA</div>
-      <div style="margin-top:5px;font-size:11px;color:#6b7280;letter-spacing:.12em;text-transform:uppercase">Global Solutions · Operating in Advance</div>
+      <div style="font-size:20px;font-weight:800;letter-spacing:.08em">Dev’ai Controller</div>
+      <div style="margin-top:5px;font-size:11px;color:#6b7280;letter-spacing:.12em;text-transform:uppercase">Secure operator notifications</div>
     </td></tr>
     <tr><td style="padding:12px 36px 34px">
       ${input.eyebrow ? `<div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">${escapeHtml(input.eyebrow)}</div>` : ''}
@@ -39,19 +39,19 @@ export function operavaEmailTemplate(input: { eyebrow?: string; title: string; m
       ${actionUrl && actionLabel ? `<div style="margin-top:26px"><a href="${actionUrl}" style="display:inline-block;background:#111827;color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:700">${actionLabel}</a></div>` : ''}
     </td></tr>
     <tr><td style="padding:20px 36px;border-top:1px solid #eef0f2;font-size:11px;line-height:1.6;color:#8a8f98">
-      Automation, Technology, Workforce and Global Business Outsourcing Solutions<br/>This is an automated transactional message from OPERAVA GLOBAL SOLUTIONS.
+      This is an automated security or account notification from Dev’ai Controller.
     </td></tr>
   </table></td></tr></table></body></html>`;
 }
 
-export const OPERAVA_EMAIL_FROM = 'Operava <noreply@internal.operavaglobal.com>';
+export const DEVAI_EMAIL_FROM = 'Dev’ai Controller <notification@app.jelvan.pro>';
 export type DeliveryResult = { provider: 'cloudflare-email'; id?: string };
 
 export async function sendTransactionalEmail(params: SendEmailParams): Promise<DeliveryResult> {
   if (!cloudflareEmail) throw new Error('Cloudflare Email Service binding is not available.');
   const response = await cloudflareEmail.send({
     to: params.to,
-    from: OPERAVA_EMAIL_FROM,
+    from: DEVAI_EMAIL_FROM,
     subject: params.subject,
     html: params.html,
     text: params.text,
