@@ -30,13 +30,23 @@ The server fails closed when credentials are absent. `ADMIN_WJT_KEY` is accepted
 Optional integrations:
 
 - `GITHUB_TOKEN` — repository inspection and draft PR operations.
-- `RESEND_API_KEY` — transactional email.
+- `RESEND_API_KEY` — primary transactional email provider.
+- `EMAIL_FROM` — verified OPERAVA sender identity used by both Resend and Cloudflare fallback.
+- `EMAIL_FORWARD_TO` — verified destination for inbound Cloudflare Email Routing forwarding.
 - `OPENAI_API_KEY` — optional AI fallback.
 - `GEMINI_API_KEY` — optional provider integration.
 - `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` — optional legacy persistence for token/audit records.
 - `WORKER_SECRET` — encryption seed for stored provider credentials.
 
 Workers AI uses the `AI` binding and does not need a browser-exposed API key.
+
+### Transactional email and routing
+
+Outbound transactional mail uses Resend first. If Resend is unavailable or rejects the request (including a provider rate-limit response), delivery falls back to the Cloudflare `EMAIL` send binding. The application does not claim success unless one provider accepts the message.
+
+The Worker also implements an inbound `email()` handler. Configure Cloudflare Email Routing to send the intended OPERAVA address to this Worker, and verify `EMAIL_FORWARD_TO` as a destination before enabling the rule. Cloudflare Email Sending requires the sender domain to be onboarded; Resend likewise requires a verified sender/domain for production delivery.
+
+Branded email endpoints include public administrator email-OTP request/verification and an authenticated transactional update endpoint. OTP requests are restricted to the configured administrator email and throttled per Worker isolate.
 
 ## GitHub Actions deployment
 
@@ -81,11 +91,12 @@ npm start
 1. Authenticate Wrangler to the intended Cloudflare account.
 2. Configure `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_JWT_KEY` with `wrangler secret put`.
 3. Configure optional provider secrets only for features you intend to use.
-4. Verify the Workers AI `AI` binding in `wrangler.toml`.
-5. Add GitHub Actions deployment credentials to repository secrets.
-6. Merge only after PR verification is green.
-7. Verify `/api/health` and `/api/auth/readiness`; readiness must report all three auth fields configured.
-8. Sign in, verify `/api/auth/verify-session`, and inspect the authenticated dashboards.
+4. Verify the Workers AI `AI` binding and Cloudflare `EMAIL` send binding in `wrangler.toml`.
+5. Onboard the OPERAVA sender domain in Resend and Cloudflare Email Service, configure `EMAIL_FROM`, and create the Cloudflare Email Routing rule to this Worker with a verified `EMAIL_FORWARD_TO` destination.
+6. Add GitHub Actions deployment credentials to repository secrets.
+7. Merge only after PR verification is green.
+8. Verify `/api/health` and `/api/auth/readiness`; readiness must report all three auth fields configured.
+9. Sign in, verify `/api/auth/verify-session`, request a test email OTP, and inspect the authenticated dashboards.
 
 ## Security invariants
 
