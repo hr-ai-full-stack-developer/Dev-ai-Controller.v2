@@ -40,9 +40,9 @@ Workers AI uses the `AI` binding and does not need a browser-exposed API key.
 
 ### Transactional email and routing
 
-Outbound transactional mail uses the Cloudflare `EMAIL` send binding. The sender is fixed in code to `Operava <noreply@internal.operavaglobal.com>`. Workers AI may create or refine message content, but Cloudflare Email Service is the actual mail transport. The application does not claim success unless Email Service accepts the message.
+Outbound transactional mail uses the Cloudflare `EMAIL` send binding. The sender is fixed in code to `Dev’ai Controller <notification@app.jelvan.pro>`. Workers AI may create or refine message content, but Cloudflare Email Service is the actual mail transport. The application does not claim success unless Email Service accepts the message.
 
-The Worker also implements an inbound `email()` handler. Configure Cloudflare Email Routing to send the intended OPERAVA address to this Worker, and verify `EMAIL_FORWARD_TO` as a destination before enabling the rule. Cloudflare Email Sending requires `internal.operavaglobal.com` to be onboarded separately as an Email Sending subdomain before this sender can deliver mail.
+The Worker also implements an inbound `email()` handler. Configure Cloudflare Email Routing to send the intended Dev’ai Controller address to this Worker, and verify `EMAIL_FORWARD_TO` as a destination before enabling the rule. Cloudflare Email Sending requires `app.jelvan.pro` to be onboarded separately as an Email Sending subdomain before this sender can deliver mail.
 
 Branded email endpoints include public administrator email-OTP request/verification and an authenticated transactional update endpoint. OTP requests are restricted to the configured administrator email and throttled per Worker isolate.
 
@@ -90,7 +90,7 @@ npm start
 2. Configure `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_JWT_KEY` with `wrangler secret put`.
 3. Configure optional provider secrets only for features you intend to use.
 4. Verify the Workers AI `AI` binding and Cloudflare `EMAIL` send binding in `wrangler.toml`.
-5. Onboard `internal.operavaglobal.com` in Cloudflare Email Service for Email Sending, then create the intended Email Routing rule to this Worker with a verified `EMAIL_FORWARD_TO` destination.
+5. Onboard `app.jelvan.pro` in Cloudflare Email Service for Email Sending, then create the intended Email Routing rule to this Worker with a verified `EMAIL_FORWARD_TO` destination.
 6. Add GitHub Actions deployment credentials to repository secrets.
 7. Merge only after PR verification is green.
 8. Verify `/api/health` and `/api/auth/readiness`; readiness must report all three auth fields configured.
