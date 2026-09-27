@@ -42,6 +42,7 @@ import {
 } from './auth.js';
 import { devaiEmailTemplate, sendTransactionalEmail } from './services/emailDeliveryService.js';
 import { notifyAdminAccountEvent } from './services/accountNotificationService.js';
+import { runtimeEnv } from './runtimeEnv.js';
 import {
   listPlatformAgents,
   getPlatformAgent,
@@ -82,8 +83,14 @@ export function createApp() {
     if (!req.path.startsWith('/api/') && !req.path.startsWith('/v1/')) return next();
     res.setHeader('Cache-Control', 'no-store');
     if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && req.headers.origin) {
-      const origin = new URL(req.headers.origin);
-      if (origin.host !== req.headers.host) return res.status(403).json({ success: false, error: 'Cross-origin request rejected.' });
+      try {
+        const origin = new URL(req.headers.origin);
+        const forwardedHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+        const requestHost = forwardedHost || req.headers.host || '';
+        if (origin.host !== requestHost) return res.status(403).json({ success: false, error: 'Cross-origin request rejected.' });
+      } catch {
+        return res.status(400).json({ success: false, error: 'Invalid request origin.' });
+      }
     }
     const publicRoutes = ['/api/health', '/api/auth/login', '/api/auth/readiness', '/api/auth/reset-password', '/api/auth/email-otp/request', '/api/auth/email-otp/verify', '/v1/widget/chat'];
     if (publicRoutes.includes(req.path)) return next();
@@ -96,7 +103,7 @@ export function createApp() {
       status: 'healthy',
       app: 'Dev’ai Controller',
       version: '2.5.0',
-      runtime: process.env.CF_PAGES || process.env.CLOUDFLARE_ACCOUNT_ID ? 'Cloudflare-compatible' : 'Node/local',
+      runtime: runtimeEnv('NODE_ENV') === 'production' ? 'Cloudflare Worker' : 'Node/local',
       integrations: {
         cloudflareApi: Boolean(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN),
         github: Boolean(process.env.GITHUB_TOKEN),
