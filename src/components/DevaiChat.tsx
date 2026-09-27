@@ -68,10 +68,10 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const quickPrompts = [
-    'Audit Cloudflare Workers AI edge model health and token status',
-    'Test sending a deployment alert email via Resend to developer@operava.com',
-    'Inspect Supabase PostgreSQL connection and active RLS policies',
-    'List repositories and staged pull requests on GitHub',
+    'Are my connected services working?',
+    'What can this assistant help me with?',
+    'Show me my GitHub repositories',
+    'How do I safely deploy a new version?',
   ];
 
   // Cycling dots indicator: '.' -> '..' -> '...' -> '....'
@@ -300,15 +300,15 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
         id: `err-${Date.now()}`,
         sessionId,
         role: 'assistant',
-        content: `Error executing command: ${err.message || 'Network timeout'}.`,
+        content: 'I couldn’t complete that request. Please try again in a moment.',
         status: 'error',
         timestamp: new Date().toISOString(),
         nonTechExplanation: {
           simpleSummary:
-            'Dev’ai could not complete this request because the edge server connection took too long or experienced an interruption.',
+            'Dev’ai could not complete the request because the connection was interrupted or took too long.',
           actionableFix:
-            'Please check your connection and retry. If this repeats, check the Knowledge Center tab for common resolution steps.',
-          suggestedActionLabel: 'Retry Command',
+            'Try again. If it keeps happening, open Knowledge for troubleshooting help.',
+          suggestedActionLabel: 'Try again',
         },
       };
       setMessages((prev) => [...prev, fallbackErrorMsg]);
@@ -349,7 +349,7 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xs sm:text-sm font-bold tracking-tight text-[#1a1a1a]">
-                Dev’ai AI Assistant
+                Dev’ai
               </h1>
               {isLoading && (
                 <span className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#fef7e6] text-[#8a6a2a] font-semibold border border-[#f5e2b8] shadow-2xs">
@@ -387,7 +387,7 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
             <button
               onClick={onNavigateToKnowledge}
               className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#5f6368] dark:text-[#9aa0a6] hover:text-[#1a1d24] dark:hover:text-[#f0f3f6] hover:bg-[#f0f2f5] dark:hover:bg-[#1f242e] transition-colors cursor-pointer"
-              title="Knowledge Center (Non-Tech Guides & Errors)"
+              title="Open help and guides"
             >
               <HelpCircle className="h-3.5 w-3.5 text-emerald-500" />
               <span className="hidden sm:inline">Knowledge</span>
@@ -424,7 +424,7 @@ export const DevaiChat: React.FC<DevaiChatProps> = ({
                 How can I help you today?
               </h2>
               <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6] leading-relaxed max-w-md">
-                Ask anything about your services, deployments, repository, or troubleshooting guides.
+                Ask a question in your own words. Dev’ai will keep the answer clear and explain technical terms when needed.
               </p>
             </div>
 
