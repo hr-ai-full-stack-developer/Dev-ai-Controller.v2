@@ -18,3 +18,9 @@ enabled = true
 [vars]
 NODE_ENV = "production"
 PRIMARY_AI_MODEL = "@cf/meta/llama-3.3-70b-instruct"
+
+
+# Cloudflare Email Service fallback for transactional mail.
+# The sender domain must be onboarded in Cloudflare Email Service.
+[[send_email]]
+name = "EMAIL"
