@@ -305,7 +305,7 @@ export function createApp() {
 
       const completion = await generateCompletion({
         prompt,
-        systemPrompt: 'You are Dev’ai Controller Assistant. You orchestrate Cloudflare Workers, Cloudflare AI, GitHub repositories, Supabase databases, and Resend transactional notifications.',
+        systemPrompt: 'You are Dev’ai Controller Assistant. Describe only capabilities that are actually configured or verified. Use the application services and provider status instead of inventing actions or integrations.',
       });
 
       res.json({
