@@ -30,7 +30,10 @@ jobs:
         run: npx wrangler deploy --dry-run
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    # Keep deploy independent from verify because a GitHub-hosted runner can fail to\n    # initialize before any verification step starts. Deployment still performs its\n    # own clean install, typecheck, tests, build and Wrangler validation below.\n    runs-on: ubuntu-latest
+    # Keep deploy independent from verify because a GitHub-hosted runner can fail to
+    # initialize before any verification step starts. Deployment still performs its
+    # own clean install, typecheck, tests, build and Wrangler validation below.
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,7 +41,15 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: TypeScript check\n        run: npm run lint\n      - name: API and provider tests\n        run: npm test\n      - name: Build web application\n        run: npm run build:web\n      - name: Validate Cloudflare Worker bundle\n        run: npx wrangler deploy --dry-run\n      - name: Check deployment credentials
+      - name: TypeScript check
+        run: npm run lint
+      - name: API and provider tests
+        run: npm test
+      - name: Build web application
+        run: npm run build:web
+      - name: Validate Cloudflare Worker bundle
+        run: npx wrangler deploy --dry-run
+      - name: Check deployment credentials
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
