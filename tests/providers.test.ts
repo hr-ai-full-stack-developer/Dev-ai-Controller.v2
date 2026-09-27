@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { generateCompletion, setAiBinding } from '../server/services/aiProvider.js';
 import { triggerDeployment, rollbackDeployment } from '../server/services/deploymentsService.js';
+import { executeAiAction } from '../server/aiRouter.js';
 
 test('Workers AI binding preserves source code in structured coding responses', async () => {
   const source = '{"files":[{"content":"const x = 2 * 3; // ---"}]}';
@@ -32,4 +33,27 @@ test('deployment controls use provider version IDs and report provider rejection
   } finally {
     globalThis.fetch = originalFetch; delete process.env.CLOUDFLARE_ACCOUNT_ID; delete process.env.CLOUDFLARE_API_TOKEN;
   }
+});
+
+test('assistant prompt requires plain language and forbids invented actions', async () => {
+  let captured: any;
+  setAiBinding({ run: async (_model: string, input: any) => { captured = input; return { response: 'I can explain that simply.' }; } });
+  try {
+    const result = await executeAiAction('What can you help me with?');
+    assert.equal(result.message, 'I can explain that simply.');
+    const system = captured.messages?.find((m: any) => m.role === 'system')?.content || '';
+    assert.match(system, /everyday words/i);
+    assert.match(system, /technical term/i);
+    assert.match(system, /Never claim/i);
+    assert.match(system, /do not know/i);
+  } finally {
+    setAiBinding(undefined);
+  }
+});
+
+test('common service question returns real status path instead of invented AI status', async () => {
+  const result = await executeAiAction('Can you check service status and connections?');
+  assert.equal(result.actionExecuted, 'services.status');
+  assert.equal(result.provider, 'system');
+  assert.ok(result.message.length > 0);
 });
