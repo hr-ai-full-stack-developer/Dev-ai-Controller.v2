@@ -34,7 +34,6 @@ Cloudflare deployment credentials:
 
 Optional integrations:
 - GITHUB_TOKEN
-- RESEND_API_KEY
 - OPENAI_API_KEY
 - GEMINI_API_KEY
 - SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
