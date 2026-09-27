@@ -99,7 +99,7 @@ export function createApp() {
       integrations: {
         cloudflareApi: Boolean(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN),
         github: Boolean(process.env.GITHUB_TOKEN),
-        resend: Boolean(process.env.RESEND_API_KEY),
+        cloudflareEmail: true,
         supabase: Boolean(process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY)),
         openaiFallback: Boolean(process.env.OPENAI_API_KEY),
       },
@@ -107,7 +107,7 @@ export function createApp() {
     });
   });
 
-  // 1. Services Operational Status (Resend, Supabase, GitHub, Cloudflare, OpenAI fallback)
+  // 1. Services Operational Status
   app.get('/api/status', async (req, res) => {
     try {
       const statusData = await getServicesStatus();
@@ -256,7 +256,7 @@ export function createApp() {
         text: `Your OPERAVA verification code is ${otp}. It expires at ${new Date(expiresAt).toISOString()}.`,
       });
       emailOtpRequests.set(requested, Date.now());
-      return res.json({ ...accepted, delivery: { provider: delivery.provider, fallbackUsed: delivery.fallbackUsed } });
+      return res.json({ ...accepted, delivery: { provider: delivery.provider } });
     } catch (err: any) {
       console.error('Email OTP delivery failed:', err);
       return res.status(503).json({ success: false, error: 'Verification email could not be delivered.' });

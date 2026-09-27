@@ -16,6 +16,8 @@ Use this checklist with [DEPLOYMENT.md](DEPLOYMENT.md). Items describe the curre
 - [ ] Deployment target is the intended Cloudflare account.
 - [ ] Worker name is `devai-controller`.
 - [ ] Workers AI binding `AI` is present.
+- [ ] Cloudflare Email Service binding `EMAIL` is present and restricted to `noreply@internal.operavaglobal.com`.
+- [ ] `internal.operavaglobal.com` is onboarded for Cloudflare Email Sending.
 - [ ] Static assets are served from `./dist`.
 - [ ] API routes run through the Worker before SPA fallback.
 - [ ] `ADMIN_EMAIL` is configured as a Worker secret.
@@ -29,7 +31,6 @@ Use this checklist with [DEPLOYMENT.md](DEPLOYMENT.md). Items describe the curre
 Configure and test only providers actually required:
 
 - [ ] GitHub: `GITHUB_TOKEN`.
-- [ ] Resend: `RESEND_API_KEY`.
 - [ ] OpenAI fallback: `OPENAI_API_KEY`.
 - [ ] Gemini: `GEMINI_API_KEY`.
 - [ ] Legacy Supabase persistence: `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.

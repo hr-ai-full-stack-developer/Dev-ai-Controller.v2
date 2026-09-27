@@ -22,11 +22,6 @@ export function listAgentCapabilities(): AgentCapability[] {
       description: 'Cloudflare API deployment inspection and explicitly approved deployment operations implemented by the deployment service.',
     },
     {
-      id: 'resend.email', provider: 'resend', transport: 'api', operations: ['execute'],
-      configured: Boolean(runtimeEnv('RESEND_API_KEY')), requiresApprovalForWrite: true,
-      description: 'Resend transactional email through the server-side provider adapter.',
-    },
-    {
       id: 'agent.memory', provider: 'native', transport: 'native', operations: ['read','write'],
       configured: true, requiresApprovalForWrite: true,
       description: 'Standard memory contract. Durable when the dedicated Supabase memory connection is configured; otherwise process-local only.',
