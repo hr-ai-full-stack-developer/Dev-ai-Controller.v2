@@ -63,7 +63,7 @@ export const AgentsPlatform: React.FC = () => {
     {
       role: 'assistant',
       agentName: 'General Agent',
-      text: 'Welcome to the Agents. I can retrieve authorized knowledge, invoke MCP tools across GitHub, Figma, Resend, and Cloudflare, coordinate with specialized sub-agents, or formulate deterministic scheduled automations.',
+      text: 'Tell me what you want to accomplish. I’ll use the tools and knowledge that are actually available, explain the plan simply, and ask before important actions.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -163,38 +163,12 @@ export const AgentsPlatform: React.FC = () => {
     setIsAgentThinking(true);
 
     try {
-      // Check if user is asking to trigger sub-agent flow or automation
-      if (userText.toLowerCase().includes('design') || userText.toLowerCase().includes('figma')) {
-        setAgentToAgentDemo(true);
-        setTimeout(() => {
-          setChatMessages((prev) => [
-            ...prev,
-            {
-              role: 'agent-call',
-              agentName: 'General Agent -> Design Agent',
-              text: 'I’m asking the Design Agent to review the available design information.',
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              toolsUsed: ['agent.call', 'figma.read'],
-            },
-            {
-              role: 'assistant',
-              agentName: 'Design Agent',
-              text: 'The Design Agent reviewed the available design settings and can use them to keep the interface consistent.',
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              toolsUsed: ['figma.read'],
-            },
-          ]);
-          setIsAgentThinking(false);
-        }, 1200);
-        return;
-      }
-
       // Default AI completion
       const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `Agent: ${selectedAgent?.name || 'General Agent'}. Role: ${selectedAgent?.type}. User says: "${userText}". Provide a concise, authorized answer. Ground yourself in knowledge if applicable.`,
+          prompt: `Agent: ${selectedAgent?.name || 'General Agent'}. Role: ${selectedAgent?.type}. User says: "${userText}". Answer in plain language. Start with the direct answer, explain only what matters, distinguish facts from assumptions, and never claim a tool or external action ran unless the response contains a verified result.`,
         }),
       });
       const data = await res.json();
@@ -372,7 +346,7 @@ export const AgentsPlatform: React.FC = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-[#1a1d24] dark:text-[#f0f3f6]">
-                General AI Agent Platform
+                Agents
               </h1>
               <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6]">
                 Build, connect, and run agents from one workspace.
@@ -394,7 +368,7 @@ export const AgentsPlatform: React.FC = () => {
             <Workflow className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
             <span>Flows</span>
             <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-mono">
-              6
+              {agents.length}
             </span>
           </button>
 

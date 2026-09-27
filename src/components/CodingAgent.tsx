@@ -35,10 +35,10 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
   const [activeTask, setActiveTask] = useState<CodingTask | null>(tasks[0] || null);
 
   const quickPrompts = [
-    'Add Supabase JWT verification middleware to edge router',
-    'Implement Resend deployment alert dispatcher on production release',
-    'Audit repository dependencies & generate secure Cloudflare Workers config',
-    'Create automated pull request with lint & build validation',
+    'Review sign-in security and suggest a safe improvement',
+    'Add a deployment notification for successful releases',
+    'Review the project setup for security and configuration issues',
+    'Prepare a safe code fix as a draft pull request',
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,7 +72,7 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
         <div className="mt-4 pt-4 border-t border-[#f0f2f5] dark:border-[#232834] grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] font-medium text-[#5f6368] dark:text-[#9aa0a6] mb-1">
-              Target Repository
+              Repository
             </label>
             <div className="relative">
               <FolderGit2 className="absolute left-3 top-2.5 h-4 w-4 text-[#5f6368] dark:text-[#9aa0a6]" />
@@ -86,7 +86,7 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
 
           <div>
             <label className="block text-[11px] font-medium text-[#5f6368] dark:text-[#9aa0a6] mb-1">
-              Working Branch
+              Draft branch
             </label>
             <div className="relative">
               <GitBranch className="absolute left-3 top-2.5 h-4 w-4 text-[#5f6368] dark:text-[#9aa0a6]" />
@@ -104,21 +104,21 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
         {/* Prompt Input Form */}
         <form onSubmit={handleSubmit} className="mt-4">
           <label className="block text-[11px] font-medium text-[#5f6368] dark:text-[#9aa0a6] mb-1">
-            Coding Task Description
+            What should the agent fix?
           </label>
           <div className="relative">
             <textarea
               rows={3}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe the feature, bugfix, or refactoring task for the Cloudflare Coding Agent (e.g., 'Add Supabase JWT verification middleware and unit tests')..."
+              placeholder="Describe the problem or improvement in plain language..."
               className="w-full p-3 text-xs rounded-xl bg-[#f8f9fb] dark:bg-[#1f232c] border border-[#e2e4e9] dark:border-[#2e333d] text-[#1a1d24] dark:text-[#f0f3f6] focus:outline-hidden focus:ring-2 focus:ring-purple-500 placeholder:text-[#80868b] resize-none"
             />
           </div>
 
           {/* Quick Prompts */}
           <div className="mt-2.5 flex flex-wrap gap-1.5">
-            <span className="text-[11px] text-[#80868b] self-center mr-1">Quick Tasks:</span>
+            <span className="text-[11px] text-[#80868b] self-center mr-1">Examples:</span>
             {quickPrompts.map((qp, i) => (
               <button
                 key={i}
@@ -136,10 +136,10 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
               {isLoading ? (
                 <span className="flex items-center text-purple-600 dark:text-purple-400">
                   <span className="h-2 w-2 rounded-full bg-purple-500 animate-ping mr-2" />
-                  Dev’ai Workers AI analyzing repo & generating code...
+                  Dev’ai is reading the project and preparing a safe draft...
                 </span>
               ) : (
-                'Non-destructive: Generates diffs and stages GitHub Pull Requests.'
+                'Creates an isolated draft pull request for you to review.'
               )}
             </span>
 
@@ -149,7 +149,7 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
               className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-[#ff6b35] via-[#ea580c] to-[#9333ea] hover:opacity-95 text-white transition-all shadow-xs cursor-pointer disabled:opacity-50"
             >
               <Play className="h-3.5 w-3.5 fill-current" />
-              <span>{isLoading ? 'Executing...' : 'Run Coding Agent'}</span>
+              <span>{isLoading ? 'Working...' : 'Prepare Fix'}</span>
             </button>
           </div>
         </form>
@@ -161,7 +161,7 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
           {/* Recent Tasks List */}
           <div className="lg:col-span-1 space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-[#5f6368] dark:text-[#9aa0a6] px-1">
-              Coding Tasks History
+              Recent work
             </h3>
             <div className="space-y-2">
               {tasks.map((task) => (
@@ -215,7 +215,7 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
                     className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#f0f2f5] dark:bg-[#202530] text-[#1a1d24] dark:text-[#f0f3f6] hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/40 transition-colors border border-[#e2e4e9] dark:border-[#2c3240] self-start"
                   >
                     <GitPullRequest className="h-3.5 w-3.5 text-orange-500" />
-                    <span>View PR on GitHub</span>
+                    <span>Review draft PR</span>
                     <ExternalLink className="h-3 w-3 ml-1 opacity-70" />
                   </a>
                 )}
@@ -224,7 +224,7 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
               {/* Execution Steps Accordion */}
               <div>
                 <p className="text-[11px] font-semibold text-[#5f6368] dark:text-[#9aa0a6] uppercase tracking-wider mb-2">
-                  Execution Workflow Steps
+                  Plan
                 </p>
                 <div className="space-y-1.5">
                   {activeTask.plan.map((step, idx) => (
@@ -240,10 +240,10 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
               </div>
 
               {/* Validation Badges */}
-              <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between text-xs">
-                <div className="flex items-center space-x-2 text-emerald-800 dark:text-emerald-300">
+              <div className="p-3 rounded-xl bg-[#f8f9fb] dark:bg-[#1a1e27] border border-[#e2e4e9] dark:border-[#2e333d] flex items-center justify-between text-xs">
+                <div className="flex items-center space-x-2 text-[#5f6368] dark:text-[#9aa0a6]">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  <span className="font-medium">Validation Status:</span>
+                  <span className="font-medium">Verification:</span>
                   <span>{activeTask.validationResults.output}</span>
                 </div>
                 <div className="flex space-x-2">
@@ -260,7 +260,7 @@ export const CodingAgent: React.FC<CodingAgentProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-[11px] font-semibold text-[#5f6368] dark:text-[#9aa0a6] uppercase tracking-wider">
-                    Surgical Code Diff ({activeTask.filesModified.length} file modified)
+                    Proposed changes ({activeTask.filesModified.length} file modified)
                   </p>
                   <span className="text-[10px] font-mono text-[#5f6368] dark:text-[#9aa0a6]">
                     Commit {activeTask.commitSha}
