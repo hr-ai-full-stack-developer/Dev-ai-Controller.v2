@@ -62,7 +62,7 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
   };
 
   const getStatusBadge = (status: string, isFallback?: boolean) => {
-    if (isFallback) {
+    if (isFallback && status === 'standby') {
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
           <span className="h-1.5 w-1.5 rounded-full bg-blue-500 mr-1.5 animate-pulse" />
@@ -78,10 +78,11 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
         </span>
       );
     }
+    const label = status === 'offline' ? 'Offline' : 'Degraded';
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
         <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mr-1.5" />
-        Degraded
+        {label}
       </span>
     );
   };
@@ -103,7 +104,7 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
-              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <span className={`flex h-2.5 w-2.5 rounded-full ${systemSummary?.overallStatus === 'all_operational' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
               <h2 className="text-lg font-semibold tracking-tight text-[#1a1d24] dark:text-[#f0f3f6]">
                 Services Status
               </h2>
@@ -218,7 +219,7 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
               <div className="flex items-center space-x-1.5 text-[#5f6368] dark:text-[#9aa0a6]">
                 <Clock className="h-3 w-3 text-orange-500" />
                 <span>Response:</span>
-                <span className="font-semibold text-[#1a1d24] dark:text-[#f0f3f6]">{service.latencyMs}ms</span>
+                <span className="font-semibold text-[#1a1d24] dark:text-[#f0f3f6]">{service.latencyMs > 0 ? `${service.latencyMs}ms` : 'Not measured'}</span>
               </div>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#f4f5f8] dark:bg-[#202530] text-[#5f6368] dark:text-[#9aa0a6]">
                 {service.version || 'Not reported'}
