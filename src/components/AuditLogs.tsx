@@ -198,7 +198,7 @@ export const AuditLogs: React.FC<AuditLogsProps> = ({ logs, onRefresh }) => {
                           <div>Status: {log.status}</div>
                           <div>Latency: {log.durationMs}ms</div>
                           <div>Timestamp: {log.timestamp}</div>
-                          <div>User: {log.user || 'secured.jelvan@gmail.com'}</div>
+                          <div>User: {log.user || 'system'}</div>
                         </div>
                       </div>
 

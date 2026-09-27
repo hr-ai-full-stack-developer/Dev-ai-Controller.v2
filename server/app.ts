@@ -94,13 +94,15 @@ export function createApp() {
       status: 'healthy',
       app: 'Dev’ai Controller',
       version: '2.5.0',
-      runtime: 'Cloudflare Workers & Edge Orchestrator',
-      primaryAi: 'Cloudflare Workers AI (@cf/meta/llama-3.3-70b)',
-      fallbackAi: 'OpenAI (gpt-4o-mini)',
-      database: 'Supabase PostgreSQL (RLS Enforced)',
-      email: 'Resend Transactional Mailer',
-      sourceControl: 'GitHub API v3',
-      secretsSecured: true,
+      runtime: process.env.CF_PAGES || process.env.CLOUDFLARE_ACCOUNT_ID ? 'Cloudflare-compatible' : 'Node/local',
+      integrations: {
+        cloudflareApi: Boolean(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN),
+        github: Boolean(process.env.GITHUB_TOKEN),
+        resend: Boolean(process.env.RESEND_API_KEY),
+        supabase: Boolean(process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY)),
+        openaiFallback: Boolean(process.env.OPENAI_API_KEY),
+      },
+      adminConfigured: Boolean(ADMIN_EMAIL && ADMIN_PASSWORD && ADMIN_WJT_KEY),
     });
   });
 

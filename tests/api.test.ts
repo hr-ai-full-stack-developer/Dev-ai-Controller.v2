@@ -56,3 +56,21 @@ test('logout expires the browser cookie', async () => {
   const r = await request('/api/auth/logout','POST'); assert.equal(r.status,200);
   assert.match(r.headers.get('set-cookie')!, /Expires=Thu, 01 Jan 1970/);
 });
+
+test('health reports configuration truthfully without claiming optional providers', async () => {
+  const r = await request('/api/health', 'GET', undefined, false);
+  assert.equal(r.status, 200);
+  const body = await r.json();
+  assert.equal(body.adminConfigured, true);
+  assert.equal(body.integrations.github, false);
+  assert.equal(body.integrations.resend, false);
+  assert.equal(body.integrations.supabase, false);
+  assert.equal(body.integrations.openaiFallback, false);
+  assert.equal(typeof body.database, 'undefined');
+  assert.equal(typeof body.secretsSecured, 'undefined');
+});
+test('authenticated identity comes from configured environment rather than a UI fixture', async () => {
+  const body = await (await request('/api/auth/me')).json();
+  assert.equal(body.user.email, 'test@example.com');
+  assert.equal(body.user.sessionValid, true);
+});

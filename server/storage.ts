@@ -357,7 +357,7 @@ export async function listAuditLogs(limit: number = 50): Promise<AuditLog[]> {
           action: d.action,
           service: d.service || d.provider || 'system',
           status: d.status,
-          user: d.user_email || 'secured.jelvan@gmail.com',
+          user: d.user_email || process.env.ADMIN_EMAIL || 'system',
           durationMs: d.duration_ms,
           summary: d.summary,
           details: d.details,
