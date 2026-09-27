@@ -91,8 +91,8 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-[10px]">
         {/* Active edge indicator */}
         <div className="hidden sm:flex items-center gap-[6px] px-[9px] h-[30px] rounded-full bg-white border border-[#e7e5d8] text-[11px] font-medium text-[#2d6a2a]">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Edge Live (330+ PoPs)</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span>Signed in</span>
         </div>
 
         {/* User Profile Pill */}
@@ -105,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({
               {currentUser.name ? currentUser.name.slice(0, 2).toUpperCase() : 'OP'}
             </div>
             <span className="text-[12px] font-medium text-[#1a1a1a] hidden sm:inline">
-              {currentUser.name || 'Jelvan'}
+              {currentUser.name || 'Operator'}
             </span>
           </button>
 
@@ -118,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 <div className="min-w-0">
                   <h4 className="font-semibold text-sm text-[#111827] truncate">
-                    {currentUser.name || 'Jelvan'}
+                    {currentUser.name || 'Operator'}
                   </h4>
                   <p className="text-[11px] text-[#6b7280] truncate">
                     {currentUser.email}
