@@ -69,7 +69,6 @@ export const AgentsPlatform: React.FC = () => {
   ]);
   const [chatInput, setChatInput] = useState<string>('');
   const [isAgentThinking, setIsAgentThinking] = useState<boolean>(false);
-  const [agentToAgentDemo, setAgentToAgentDemo] = useState<boolean>(false);
 
   // Tools & MCP State
   const [tools, setTools] = useState<ToolDefinition[]>([]);
@@ -1066,57 +1065,19 @@ export const AgentsPlatform: React.FC = () => {
           ============================================================ */}
       {activeSubTab === 'architecture' && (
         <div className="space-y-6">
-          {/* Cloudflare Runtime & Bindings Grid */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#161a22] border border-[#e2e4e9] dark:border-[#252a35] shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-bold text-[#1a1d24] dark:text-[#f0f3f6] flex items-center space-x-2">
-                  <Layers className="h-4 w-4 text-purple-600" />
-                  <span>Cloudflare Edge Architecture & Active Bindings</span>
-                </h2>
-                <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6] mt-0.5">
-                  Production workloads run on Cloudflare Workers edge nodes. Source code is tracked in GitHub.
-                </p>
-              </div>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                Runtime: Cloudflare Workers
-              </span>
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#161a22] border border-[#e2e4e9] dark:border-[#252a35] shadow-xs space-y-3">
+            <h2 className="text-sm font-bold text-[#1a1d24] dark:text-[#f0f3f6]">Available agent connections</h2>
+            <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6]">
+              This view shows only adapters reported by the server. MCP connections are empty until a real MCP runtime is implemented.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {tools.map((tool) => (
+                <span key={tool.toolId} className="px-2.5 py-1 rounded-lg text-[10px] border border-[#e2e4e9] dark:border-[#2c3240]">
+                  {tool.name}: {tool.enabled ? 'configured' : 'not configured'}
+                </span>
+              ))}
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl border border-[#e2e4e9] dark:border-[#282e3c] bg-[#f8f9fb] dark:bg-[#141820] space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="h-4 w-4 text-orange-500" />
-                  <span className="font-bold text-xs text-[#1a1d24] dark:text-[#f0f3f6]">Workers AI Binding</span>
-                </div>
-                <p className="text-[11px] text-[#5f6368] dark:text-[#9aa0a6]">
-                  Native <code>env.AI</code> binding executing <code>@cf/meta/llama-3.3-70b-instruct</code> without egress latency.
-                </p>
-                <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">Binding: [ai] active</div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-[#e2e4e9] dark:border-[#282e3c] bg-[#f8f9fb] dark:bg-[#141820] space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Database className="h-4 w-4 text-purple-600" />
-                  <span className="font-bold text-xs text-[#1a1d24] dark:text-[#f0f3f6]">D1 Relational DB</span>
-                </div>
-                <p className="text-[11px] text-[#5f6368] dark:text-[#9aa0a6]">
-                  SQLite database at edge storing tenant scopes, automations, schedules, and approval records.
-                </p>
-                <div className="text-[10px] font-mono text-purple-600 dark:text-purple-400">Binding: [[d1_databases]]</div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-[#e2e4e9] dark:border-[#282e3c] bg-[#f8f9fb] dark:bg-[#141820] space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Box className="h-4 w-4 text-emerald-600" />
-                  <span className="font-bold text-xs text-[#1a1d24] dark:text-[#f0f3f6]">Vectorize & R2</span>
-                </div>
-                <p className="text-[11px] text-[#5f6368] dark:text-[#9aa0a6]">
-                  Vector embeddings stored in Cloudflare Vectorize for semantic knowledge search and R2 object storage.
-                </p>
-                <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">Binding: [[vectorize]]</div>
-              </div>
-            </div>
+            <p className="text-[11px] text-[#80868b]">MCP connections reported: {mcpServers.length}</p>
           </div>
 
           {/* Embeddable Customer Service AI Widget (Spec Section 17) */}
@@ -1149,7 +1110,7 @@ export const AgentsPlatform: React.FC = () => {
 
             {/* Script Tag Display */}
             <div className="p-3.5 rounded-xl bg-[#0f1117] text-white font-mono text-xs overflow-x-auto select-all">
-              <code>{widgetConfig?.embedSnippet || `<script src="https://controller.operava.com/widget.js" async></script>`}</code>
+              <code>{widgetConfig?.embedSnippet || 'No public widget script is configured.'}</code>
             </div>
 
             {/* Security Isolation Details */}
@@ -1260,7 +1221,7 @@ export const AgentsPlatform: React.FC = () => {
                   type="text"
                   value={naturalLanguagePrompt}
                   onChange={(e) => setNaturalLanguagePrompt(e.target.value)}
-                  placeholder="e.g. Schedule monthly client email on 31 October 2026 09:00 to client@operava.com"
+                  placeholder="e.g. Prepare an email draft for name@example.com with subject \"Monthly update\""
                   className="flex-1 px-3.5 py-2 text-xs rounded-xl bg-[#f8f9fb] dark:bg-[#1f232c] border border-[#e2e4e9] dark:border-[#2e333d] text-[#1a1d24] dark:text-[#f0f3f6] focus:outline-hidden focus:ring-2 focus:ring-purple-500"
                 />
                 <button
@@ -1309,7 +1270,7 @@ export const AgentsPlatform: React.FC = () => {
                       {draftAutomation.trigger?.scheduleExpression}
                     </span>
                     <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
-                      Cloudflare Cron Trigger
+                      Draft schedule only — durable scheduler not configured
                     </span>
                   </div>
                 </div>
@@ -1317,7 +1278,7 @@ export const AgentsPlatform: React.FC = () => {
                 {/* Attached Knowledge */}
                 <div>
                   <span className="text-[10px] font-semibold text-[#80868b] uppercase tracking-wider block mb-1.5">
-                    Auto-Attached Knowledge
+                    Attached Knowledge
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {draftAutomation.attachedKnowledge?.map((k) => (
