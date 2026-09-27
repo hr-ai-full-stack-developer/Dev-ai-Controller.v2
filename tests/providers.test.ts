@@ -119,6 +119,9 @@ test('Dev’ai Controller transactional template escapes content and renders ver
   const { devaiEmailTemplate } = await import('../server/services/emailDeliveryService.js');
   const html = devaiEmailTemplate({ title: 'Confirm <access>', message: 'Safe & secure', code: '123456' });
   assert.match(html, /Dev’ai Controller/);
+  assert.match(html, /#f97316/i);
+  assert.match(html, /#facc15/i);
+  assert.match(html, /All right reserved @Jelvan Ricolcol 2026\./);
   assert.match(html, /123456/);
   assert.equal(html.includes('Confirm <access>'), false);
   assert.match(html, /Confirm &lt;access&gt;/);
