@@ -2,10 +2,11 @@ import crypto from 'crypto';
 import type { SupabaseAuthUser } from '../src/types/index.js';
 
 // Admin credentials configured strictly via environment variables
-export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@operavaglobal.com';
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
-export const ADMIN_WJT_KEY =
-  process.env.ADMIN_WJT_KEY || process.env.ADMIN_JWT_KEY || '';
+export const ADMIN_JWT_KEY = process.env.ADMIN_JWT_KEY || process.env.ADMIN_WJT_KEY || '';
+/** @deprecated Use ADMIN_JWT_KEY. */
+export const ADMIN_WJT_KEY = ADMIN_JWT_KEY;
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
