@@ -120,7 +120,7 @@ export function verifyAuthenticatorOtp(candidateOtp: string): boolean {
   // Check previous window (-30s), current window (0s), and next window (+30s)
   for (const offset of [-30000, 0, 30000]) {
     const expected = generateTotpCode(secret, now + offset, 30);
-    if (clean === expected) {
+    if (crypto.timingSafeEqual(Buffer.from(clean), Buffer.from(expected))) {
       return true;
     }
   }
@@ -155,7 +155,8 @@ export function verifyEmailOtp(email: string, candidateOtp: string): boolean {
   const now = Date.now();
   const currentStep = Math.floor(now / (1000 * 300));
 
-  for (const step of [currentStep, currentStep - 1, currentStep + 1]) {
+  // Accept the current and immediately previous window only; never accept a future code.
+  for (const step of [currentStep, currentStep - 1]) {
     const hmac = crypto.createHmac('sha256', getAdminAuthConfig().jwtKey);
     hmac.update(`email-otp:${email.toLowerCase().trim()}:${step}`);
     const hash = hmac.digest('hex');
