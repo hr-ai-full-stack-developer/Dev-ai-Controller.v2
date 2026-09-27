@@ -291,7 +291,7 @@ export const AgentKnowledgeFlows: React.FC<AgentKnowledgeFlowsProps> = ({
           <div>
             <h2 className="text-xs font-bold text-[#1a1d24] dark:text-[#f0f3f6] uppercase tracking-wider flex items-center space-x-2">
               <Workflow className="h-3.5 w-3.5 text-purple-600" />
-              <span>Select Autonomous Agent to Inspect Knowledge & Structure Flow</span>
+              <span>Select agent</span>
             </h2>
             <p className="text-[11px] text-[#5f6368] dark:text-[#9aa0a6] mt-0.5">
               Each agent features dedicated domain knowledge references, standardized input/output contracts, and structured execution stages.
@@ -391,7 +391,7 @@ export const AgentKnowledgeFlows: React.FC<AgentKnowledgeFlowsProps> = ({
                 ) : (
                   <Play className="h-3.5 w-3.5 fill-current" />
                 )}
-                <span>{isSimulatingFlow ? 'Simulating Pipeline...' : 'Test Structure Flow'}</span>
+                <span>{isSimulatingFlow ? 'Simulating Pipeline...' : 'Test flow'}</span>
               </button>
             </div>
           </div>
@@ -485,7 +485,7 @@ export const AgentKnowledgeFlows: React.FC<AgentKnowledgeFlowsProps> = ({
                 </h3>
               </div>
               <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6] mt-0.5">
-                Every autonomous agent executes the standardized 7-stage governance lifecycle: Request Understanding, Executive Plan DAG, Knowledge & Tool Preparation, Approval Gate, Deterministic Execution, Outcome Resource Verification, and Immutable Audit Telemetry.
+                Seven stages show how the selected agent plans, retrieves context, requests approval, executes, verifies, and records its work.
               </p>
             </div>
             <div className="flex items-center space-x-2 text-[11px] font-mono text-[#80868b]">
@@ -747,7 +747,7 @@ export const AgentKnowledgeFlows: React.FC<AgentKnowledgeFlowsProps> = ({
           <div>
             <h3 className="text-sm font-bold text-[#1a1d24] dark:text-[#f0f3f6] flex items-center space-x-2">
               <BookOpen className="h-4 w-4 text-purple-600" />
-              <span>Attached Knowledge References & Grounding</span>
+              <span>Attached knowledge</span>
             </h3>
             <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6] mt-0.5">
               Verified documents bound to this agent. All autonomous claims and actions cite these immutable Title IDs.
@@ -829,7 +829,7 @@ export const AgentKnowledgeFlows: React.FC<AgentKnowledgeFlowsProps> = ({
           <div>
             <h3 className="text-sm font-bold text-[#1a1d24] dark:text-[#f0f3f6] flex items-center space-x-2">
               <LinkIcon className="h-4 w-4 text-purple-600" />
-              <span>Compatible Knowledge Repository & Dynamic Linking</span>
+              <span>Available knowledge</span>
             </h3>
             <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6] mt-0.5">
               Generalized documents certified compatible with <strong>{selectedAgent?.name}</strong>. Operators can link any verified item to expand agent grounding.

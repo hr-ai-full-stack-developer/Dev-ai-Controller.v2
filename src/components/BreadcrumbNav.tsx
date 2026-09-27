@@ -33,35 +33,35 @@ export interface BreadcrumbItemConfig {
 export const TAB_REGISTRY: Record<string, BreadcrumbItemConfig> = {
   agents: {
     id: 'agents',
-    label: 'AGENTS Platform',
+    label: 'Agents',
     category: 'agents',
-    categoryLabel: 'Autonomous Agents',
+    categoryLabel: 'Agents',
     icon: Zap,
-    description: 'Multi-agent orchestration and automated execution engine',
+    description: 'Agent workspace',
   },
   chat: {
     id: 'chat',
     label: 'Dev’ai Chat',
     category: 'agents',
-    categoryLabel: 'Autonomous Agents',
+    categoryLabel: 'Agents',
     icon: Sparkles,
-    description: 'Interactive natural language command center with Gemini 3.8 Flash',
+    description: 'Assistant chat',
   },
   worker: {
     id: 'worker',
     label: 'Worker Agent',
     category: 'agents',
-    categoryLabel: 'Autonomous Agents',
+    categoryLabel: 'Agents',
     icon: Bot,
-    description: 'Cloudflare Worker bindings, secrets, and edge logic controller',
+    description: 'Worker configuration',
   },
   chathistory: {
     id: 'chathistory',
     label: 'Chat History',
     category: 'agents',
-    categoryLabel: 'Autonomous Agents',
+    categoryLabel: 'Agents',
     icon: Clock,
-    description: 'Archive of past reasoning sessions and command executions',
+    description: 'Previous chats',
   },
   coding: {
     id: 'coding',
@@ -132,22 +132,22 @@ export const TAB_REGISTRY: Record<string, BreadcrumbItemConfig> = {
 export const CATEGORY_GROUPS = [
   {
     id: 'agents',
-    label: 'Autonomous Agents',
+    label: 'Agents',
     tabIds: ['agents', 'chat', 'worker', 'chathistory'],
   },
   {
     id: 'engineering',
-    label: 'Engineering & Code',
+    label: 'Engineering',
     tabIds: ['coding', 'deployments', 'export'],
   },
   {
     id: 'observability',
-    label: 'Observability & Mesh',
+    label: 'Operations',
     tabIds: ['status', 'notifications', 'logs'],
   },
   {
     id: 'knowledge',
-    label: 'Resources & Docs',
+    label: 'Resources',
     tabIds: ['knowledge', 'docs'],
   },
 ];
