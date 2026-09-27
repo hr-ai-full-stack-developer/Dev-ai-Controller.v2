@@ -49,12 +49,6 @@ function initializeSeedData() {
       metadata: { scopes: ['repo', 'read:user', 'workflow'] },
     },
     {
-      name: 'Resend Production Mailer API Key',
-      provider: 'resend',
-      rawToken: process.env.RESEND_API_KEY,
-      metadata: { senderEmail: 'notifications@resend.dev' },
-    },
-    {
       name: 'Cloudflare Workers AI & API Token',
       provider: 'cloudflare',
       rawToken: process.env.CLOUDFLARE_API_TOKEN,
