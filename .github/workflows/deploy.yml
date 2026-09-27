@@ -18,11 +18,16 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npm test
-      - run: npm run build:web
-      - run: npx wrangler deploy --dry-run
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript check
+        run: npm run lint
+      - name: API and provider tests
+        run: npm test
+      - name: Build web application
+        run: npm run build:web
+      - name: Validate Cloudflare Worker bundle
+        run: npx wrangler deploy --dry-run
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: verify
