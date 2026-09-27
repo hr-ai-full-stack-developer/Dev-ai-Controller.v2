@@ -1048,7 +1048,7 @@ export const AgentsPlatform: React.FC = () => {
                     <p className="whitespace-pre-wrap">{msg.text}</p>
                     {msg.toolsUsed && msg.toolsUsed.length > 0 && (
                       <div className="mt-2 pt-1.5 border-t border-black/10 dark:border-white/10 flex items-center space-x-1 text-[10px] font-mono opacity-80">
-                        <span>Tools invoked:</span>
+                        <span>Used:</span>
                         <span>{msg.toolsUsed.join(', ')}</span>
                       </div>
                     )}
@@ -1057,9 +1057,11 @@ export const AgentsPlatform: React.FC = () => {
               ))}
 
               {isAgentThinking && (
-                <div className="flex items-center space-x-2 text-xs text-purple-600 dark:text-purple-400 p-2">
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                  <span>Agent orchestrating plan & querying authorized tools...</span>
+                <div className="flex items-center gap-3 p-2 text-xs text-[#5f6368] dark:text-[#9aa0a6]" role="status" aria-live="polite">
+                  <div className="w-8 h-8 rounded-[10px] bg-white dark:bg-[#141820] border border-[#e2e4e9] dark:border-[#282e3c] flex items-center justify-center overflow-hidden">
+                    <img src="/ai-thinking.svg" alt="" aria-hidden="true" className="w-7 h-7 object-contain" />
+                  </div>
+                  <span>{selectedAgent?.name || 'Agent'} is thinking…</span>
                 </div>
               )}
             </div>
@@ -1070,7 +1072,7 @@ export const AgentsPlatform: React.FC = () => {
                 type="text"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                placeholder={`Ask ${selectedAgent?.name || 'Agent'} or instruct an automation task...`}
+                placeholder={`Ask ${selectedAgent?.name || 'Agent'} anything...`}
                 className="flex-1 px-4 py-2.5 text-xs rounded-xl bg-[#f8f9fb] dark:bg-[#1a1f28] border border-[#e2e4e9] dark:border-[#2a303c] text-[#1a1d24] dark:text-[#f0f3f6] focus:outline-hidden focus:ring-2 focus:ring-purple-500"
               />
               <button
