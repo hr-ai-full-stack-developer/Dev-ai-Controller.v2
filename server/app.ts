@@ -15,6 +15,8 @@ import { listCodingTasks, executeCodingTask } from './services/codingAgentServic
 import { getLLMDocs, refreshDoc } from './services/llmsDocs.js';
 import { generateCompletion } from './services/aiProvider.js';
 import { executeAiAction, cleanResponseText } from './aiRouter.js';
+import { rememberAgentMemory, listAgentMemory, isDurableAgentMemoryConfigured } from './services/agentMemoryService.js';
+import { listAgentCapabilities } from './services/agentCapabilityService.js';
 import {
   getWorkerAgentConfig,
   updateWorkerAgentConfig,
@@ -388,6 +390,30 @@ export function createApp() {
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
+  });
+
+  app.get('/api/agents/capabilities', (_req, res) => {
+    res.json({ success: true, capabilities: listAgentCapabilities() });
+  });
+
+  // Durable agent memory: processes can be permanent; normal episodic/knowledge memory expires by policy.
+  app.get('/api/agents/memory', async (req, res) => {
+    try {
+      const tenantId = String(req.query.tenantId || 'tenant_prod_edge_001');
+      const agentId = req.query.agentId ? String(req.query.agentId) : undefined;
+      const kind = req.query.kind ? String(req.query.kind) as any : undefined;
+      const memories = await listAgentMemory({ tenantId, agentId, kind });
+      res.json({ success: true, durable: isDurableAgentMemoryConfigured(), memories });
+    } catch (err: any) { res.status(500).json({ success: false, error: err.message }); }
+  });
+
+  app.post('/api/agents/memory', requireAdminAuth, async (req, res) => {
+    try {
+      const { tenantId = 'tenant_prod_edge_001', agentId, kind, title, content, importance, expiresAt, metadata } = req.body;
+      if (!['process','knowledge','episodic'].includes(kind)) return res.status(400).json({ success: false, error: 'kind must be process, knowledge, or episodic' });
+      const memory = await rememberAgentMemory({ tenantId, agentId, kind, title, content, importance, expiresAt, metadata, source: 'operator' });
+      res.json({ success: true, durable: isDurableAgentMemoryConfigured(), memory });
+    } catch (err: any) { res.status(500).json({ success: false, error: err.message }); }
   });
 
   // 8. LLM Docs Endpoints

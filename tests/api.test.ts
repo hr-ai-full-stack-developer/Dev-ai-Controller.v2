@@ -74,3 +74,27 @@ test('authenticated identity comes from configured environment rather than a UI 
   assert.equal(body.user.email, 'test@example.com');
   assert.equal(body.user.sessionValid, true);
 });
+
+test('agent capabilities report configuration truthfully', async () => {
+  const res = await fetch(baseUrl + '/api/agents/capabilities', { headers: authHeaders });
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.success, true);
+  assert.ok(body.capabilities.some((c: any) => c.id === 'github.repository'));
+  assert.ok(body.capabilities.some((c: any) => c.id === 'supabase.database'));
+});
+
+test('agent process memory can be retained without automatic expiry', async () => {
+  const create = await fetch(baseUrl + '/api/agents/memory', {
+    method: 'POST', headers: { ...authHeaders, 'content-type': 'application/json' },
+    body: JSON.stringify({ kind: 'process', title: 'Safe repair process', content: 'Inspect, propose, verify, then request approval.', importance: 'important' }),
+  });
+  assert.equal(create.status, 200);
+  const created = await create.json();
+  assert.equal(created.memory.kind, 'process');
+  assert.equal(created.memory.expiresAt, undefined);
+  const list = await fetch(baseUrl + '/api/agents/memory?kind=process', { headers: authHeaders });
+  assert.equal(list.status, 200);
+  const listed = await list.json();
+  assert.ok(listed.memories.some((m: any) => m.title === 'Safe repair process'));
+});
