@@ -511,3 +511,33 @@ export interface CustomerWidgetConfig {
 
 
 
+
+export type AgentMemoryKind = 'process' | 'knowledge' | 'episodic';
+export type AgentMemoryImportance = 'normal' | 'important' | 'critical';
+
+export interface AgentMemoryRecord {
+  id: string;
+  tenantId: string;
+  agentId?: string;
+  kind: AgentMemoryKind;
+  title: string;
+  content: string;
+  importance: AgentMemoryImportance;
+  source: 'operator' | 'agent' | 'system';
+  status: 'active' | 'superseded';
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt?: string;
+  metadata?: Record<string, string | number | boolean>;
+}
+
+export interface AgentCapability {
+  id: string;
+  provider: 'supabase' | 'github' | 'cloudflare' | 'resend' | 'native';
+  transport: 'api' | 'mcp' | 'native';
+  operations: Array<'read' | 'write' | 'execute'>;
+  configured: boolean;
+  requiresApprovalForWrite: boolean;
+  description: string;
+}
