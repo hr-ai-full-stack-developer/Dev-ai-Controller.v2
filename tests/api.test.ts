@@ -106,3 +106,18 @@ test('public auth readiness reports required fields without exposing secrets', a
   assert.equal(JSON.stringify(body).includes(process.env.ADMIN_PASSWORD!), false);
   assert.equal(JSON.stringify(body).includes(process.env.ADMIN_JWT_KEY!), false);
 });
+
+test('Cloudflare Worker bindings can provide admin auth without process.env', async () => {
+  const { setWorkerEnv } = await import('../server/runtimeEnv.js');
+  const { getAdminAuthConfig, validateAdminCredentials } = await import('../server/auth.js');
+  const saved = { email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD, jwt: process.env.ADMIN_JWT_KEY };
+  delete process.env.ADMIN_EMAIL; delete process.env.ADMIN_PASSWORD; delete process.env.ADMIN_JWT_KEY;
+  setWorkerEnv({ ADMIN_EMAIL: 'worker@example.test', ADMIN_PASSWORD: 'worker-password', ADMIN_JWT_KEY: 'worker-jwt-key-32-bytes-minimum-value' });
+  try {
+    assert.equal(getAdminAuthConfig().email, 'worker@example.test');
+    assert.equal(validateAdminCredentials('worker@example.test', 'worker-password'), true);
+  } finally {
+    setWorkerEnv(null);
+    process.env.ADMIN_EMAIL = saved.email; process.env.ADMIN_PASSWORD = saved.password; process.env.ADMIN_JWT_KEY = saved.jwt;
+  }
+});

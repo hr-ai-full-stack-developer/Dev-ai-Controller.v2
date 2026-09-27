@@ -538,7 +538,7 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
               </div>
             ))}
           </div>
-          <span className="text-[11px] text-[#9a9993]">Trusted by 2,400+ teams</span>
+          <span className="text-[11px] text-[#9a9993]">Authorized operators only</span>
         </div>
       </div>
 
@@ -598,7 +598,7 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
                 </div>
                 <h3 className="text-[17px] font-semibold text-[#111827] tracking-[-0.01em]">Reset password</h3>
                 <p className="text-[13px] text-[#6b7280] mt-1 leading-[1.5]">
-                  Enter your email and we'll send you a secure reset link.
+                  Password recovery is administrator-managed. Enter your email to check whether self-service recovery is available.
                 </p>
 
                 <form onSubmit={handleResetSubmit} className="mt-5 space-y-3">
@@ -632,7 +632,7 @@ export const AdminProtectiveWrapper: React.FC<AdminProtectiveWrapperProps> = ({ 
                     disabled={isResetting}
                     className="w-full h-[44px] rounded-xl bg-[#111827] hover:bg-black text-white text-[14px] font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-70"
                   >
-                    {isResetting ? 'Sending...' : 'Send reset link'}
+                    {isResetting ? 'Checking...' : 'Check recovery'}
                     <ArrowRight size={14} />
                   </button>
                 </form>

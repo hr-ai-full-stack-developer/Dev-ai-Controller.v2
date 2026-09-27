@@ -1,12 +1,13 @@
 import crypto from 'crypto';
 import type { SupabaseAuthUser } from '../src/types/index.js';
+import { runtimeEnv } from './runtimeEnv.js';
 
 // Admin credentials configured strictly via environment variables
 export function getAdminAuthConfig() {
   return {
-    email: process.env.ADMIN_EMAIL || '',
-    password: process.env.ADMIN_PASSWORD || '',
-    jwtKey: process.env.ADMIN_JWT_KEY || process.env.ADMIN_WJT_KEY || '',
+    email: runtimeEnv('ADMIN_EMAIL'),
+    password: runtimeEnv('ADMIN_PASSWORD'),
+    jwtKey: runtimeEnv('ADMIN_JWT_KEY') || runtimeEnv('ADMIN_WJT_KEY'),
   };
 }
 export const isAdminAuthConfigured = () => {
