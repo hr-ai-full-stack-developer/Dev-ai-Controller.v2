@@ -4,9 +4,9 @@ import type { SupabaseAuthUser } from '../src/types/index.js';
 // Admin credentials configured strictly via environment variables
 export function getAdminAuthConfig() {
   return {
-    email: process.env.getAdminAuthConfig().email || '',
-    password: process.env.getAdminAuthConfig().password || '',
-    jwtKey: process.env.getAdminAuthConfig().jwtKey || process.env.getAdminAuthConfig().jwtKey || '',
+    email: process.env.ADMIN_EMAIL || '',
+    password: process.env.ADMIN_PASSWORD || '',
+    jwtKey: process.env.ADMIN_JWT_KEY || process.env.ADMIN_WJT_KEY || '',
   };
 }
 export const isAdminAuthConfigured = () => {
