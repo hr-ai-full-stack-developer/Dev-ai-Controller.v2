@@ -72,3 +72,10 @@ test('GitHub token check does not invent repository scope when header is absent'
     globalThis.fetch = originalFetch;
   }
 });
+
+test('worker agent starts without fabricated organization knowledge', async () => {
+  const { listKnowledgeDocuments, getWorkerAgentConfig } = await import('../server/services/workerAgentService.js');
+  assert.deepEqual(listKnowledgeDocuments(), []);
+  assert.deepEqual(getWorkerAgentConfig().activeKnowledgeDocIds, []);
+  assert.equal(getWorkerAgentConfig().cloudflareRoute, '');
+});

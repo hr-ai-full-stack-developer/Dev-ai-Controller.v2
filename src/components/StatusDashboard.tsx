@@ -158,7 +158,7 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
               <ArrowUpRight className="h-3 w-3 text-purple-500" />
             </div>
             <p className="text-xs font-semibold text-[#1a1d24] dark:text-[#f0f3f6] mt-0.5">
-              5 Edge Apps
+              {systemSummary?.totalActiveDeployments ?? 0} found
             </p>
           </div>
 
@@ -221,7 +221,7 @@ export const StatusDashboard: React.FC<StatusDashboardProps> = ({
                 <span className="font-semibold text-[#1a1d24] dark:text-[#f0f3f6]">{service.latencyMs}ms</span>
               </div>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#f4f5f8] dark:bg-[#202530] text-[#5f6368] dark:text-[#9aa0a6]">
-                {service.version || 'v1.0'}
+                {service.version || 'Not reported'}
               </span>
             </div>
 

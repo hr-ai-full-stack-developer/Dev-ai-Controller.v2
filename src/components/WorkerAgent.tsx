@@ -283,50 +283,17 @@ export const WorkerAgent: React.FC = () => {
 
   // Template Loader
   const loadTemplate = (type: 'faq' | 'policy' | 'specs') => {
-    if (type === 'faq') {
-      setNewDocTitle('Customer FAQ Template');
-      setNewDocFilename('customer_faq_template.md');
-      setNewDocFormat('md');
-      setNewDocCategory('faq');
-      setNewDocContent(`# Customer FAQ Document Template
-
-### Q: What is your standard support response time?
-A: Our team responds to all incoming queries across WhatsApp, Messenger, and Webchat within 30 seconds.
-
-### Q: How do I request an account cancellation or refund?
-A: Submit a request with your registered email. Invoices within 14 days are refunded in full automatically.
-
-### Q: Are my payment and account details secured?
-A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust storage.`);
-    } else if (type === 'policy') {
-      setNewDocTitle('Support Policy Guidelines');
-      setNewDocFilename('support_policy_guidelines.txt');
-      setNewDocFormat('txt');
-      setNewDocCategory('policy');
-      setNewDocContent(`OPERATIONAL SUPPORT POLICY GUIDELINES
-
-[SERVICE HOURS]
-- 24/7 autonomous edge coverage via Cloudflare Workers AI.
-- Human escalation available for complex account modifications.
-
-[VERIFICATION REQUIREMENTS]
-- Representatives never solicit passwords or authentication tokens over chat.
-- All password or administrative updates require two-factor OTP verification.
-
-[DISCOUNT & PRICING RULES]
-- Annual commitments receive a 20% discount applied automatically on invoice generation.`);
-    } else {
-      setNewDocTitle('Channel Integration Specifications');
-      setNewDocFilename('channel_specs.md');
-      setNewDocFormat('md');
-      setNewDocCategory('specs');
-      setNewDocContent(`# Channel Routing Specifications
-
-- WhatsApp Endpoint: /webhook/whatsapp
-- Meta Messenger Endpoint: /webhook/messenger
-- Transactional Mailer: support@operava.com via Resend
-- Cloudflare Runtime: Cloudflare Workers with Edge AI bindings.`);
-    }
+    const templates = {
+      faq: { title: 'FAQ Template', filename: 'faq.md', format: 'md' as const, category: 'faq' as const, content: '# FAQ\n\n### Q: [Question]\nA: [Verified answer]\n' },
+      policy: { title: 'Policy Template', filename: 'policy.txt', format: 'txt' as const, category: 'policy' as const, content: 'POLICY\n\nPurpose:\n[Describe the verified policy.]\n\nRules:\n- [Verified rule]\n\nEscalation:\n- [Verified escalation path]\n' },
+      specs: { title: 'Integration Notes', filename: 'integration_notes.md', format: 'md' as const, category: 'specs' as const, content: '# Integration Notes\n\n## Service\n[Name]\n\n## Verified endpoint or workflow\n[Details]\n\n## Required credentials\n[Names only; never paste secrets]\n' },
+    };
+    const template = templates[type];
+    setNewDocTitle(template.title);
+    setNewDocFilename(template.filename);
+    setNewDocFormat(template.format);
+    setNewDocCategory(template.category);
+    setNewDocContent(template.content);
     setShowFormatTemplates(false);
     setShowAddDocModal(true);
   };
@@ -344,11 +311,11 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
               Cloudflare Worker Agent
             </h1>
             <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-              Multi-Channel Edge Routing
+              Worker settings
             </span>
           </div>
           <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6] max-w-2xl leading-relaxed">
-            Autonomous customer support worker routed through WhatsApp, Messenger, Email, or Live Webchat with customizable personas and strict internal or hybrid knowledge grounding.
+            Configure how the worker responds and which verified knowledge it can use.
           </p>
         </div>
 
@@ -367,7 +334,7 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
             className="flex items-center space-x-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-[#ff6b35] via-[#ea580c] to-[#9333ea] hover:opacity-95 text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
           >
             {isSavingConfig ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-            <span>{isSavingConfig ? 'Saving...' : 'Deploy'}</span>
+            <span>{isSavingConfig ? 'Saving...' : 'Save'}</span>
           </button>
         </div>
       </div>
@@ -389,7 +356,7 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
               <div className="flex items-center space-x-2">
                 <Sliders className="h-4 w-4 text-purple-600" />
                 <h3 className="text-xs font-bold text-[#1a1d24] dark:text-[#f0f3f6] uppercase tracking-wider">
-                  Cloudflare Worker Routing Channel
+                  Channel
                 </h3>
               </div>
               <span className="text-[11px] text-[#5f6368] dark:text-[#9aa0a6] font-mono">
@@ -398,7 +365,7 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
             </div>
 
             <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6]">
-              Select the active ingress webhook channel handled by the Cloudflare edge worker:
+              Choose the channel format to use when testing responses.
             </p>
 
             {/* Channel Options */}
@@ -462,7 +429,7 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
             <div className="flex items-center space-x-2">
               <UserCheck className="h-4 w-4 text-purple-600" />
               <h3 className="text-xs font-bold text-[#1a1d24] dark:text-[#f0f3f6] uppercase tracking-wider">
-                Persona & Conversational Tone
+                Response style
               </h3>
             </div>
 
@@ -503,12 +470,12 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
             </div>
           </div>
 
-          {/* Card 3: Knowledge Source Strategy Mode */}
+          {/* Card 3: Knowledge source Mode */}
           <div className="p-5 rounded-2xl bg-white dark:bg-[#161a22] border border-[#e2e4e9] dark:border-[#262c37] shadow-xs space-y-4">
             <div className="flex items-center space-x-2">
               <Shield className="h-4 w-4 text-purple-600" />
               <h3 className="text-xs font-bold text-[#1a1d24] dark:text-[#f0f3f6] uppercase tracking-wider">
-                Knowledge Source Strategy
+                Knowledge source
               </h3>
             </div>
 
@@ -553,7 +520,7 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
               <div className="flex items-center space-x-2">
                 <FileText className="h-4 w-4 text-purple-600" />
                 <h3 className="text-xs font-bold text-[#1a1d24] dark:text-[#f0f3f6] uppercase tracking-wider">
-                  Knowledge Base Files (.txt & .md)
+                  Knowledge files
                 </h3>
               </div>
               <span className="text-xs text-[#5f6368] dark:text-[#9aa0a6]">
@@ -562,7 +529,7 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
             </div>
 
             <p className="text-xs text-[#5f6368] dark:text-[#9aa0a6] leading-relaxed">
-              Upload or create internal knowledge documents in specific markdown or text format to ground the Worker Agent.
+              Add verified documents the worker can use for organization-specific answers.
             </p>
 
             {/* Action Bar: Upload File, Format Templates, Add Text */}
@@ -606,7 +573,7 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
             {showFormatTemplates && (
               <div className="p-3 rounded-xl bg-[#f8f9fb] dark:bg-[#1a1f28] border border-purple-200 dark:border-purple-900/60 space-y-2 text-xs">
                 <div className="font-semibold text-purple-700 dark:text-purple-300">
-                  Select a Pre-Built Specific Format:
+                  Start from a template:
                 </div>
                 <div className="grid grid-cols-1 gap-1.5">
                   <button
@@ -646,7 +613,7 @@ A: Yes, all sessions and secrets are encrypted with AES-256-GCM zero-trust stora
             <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
               {docs.length === 0 ? (
                 <div className="p-8 text-center text-xs text-[#80868b] border border-dashed rounded-xl">
-                  No knowledge documents uploaded. Upload a .txt or .md file to train your worker agent.
+                  No verified knowledge added yet. Add a .txt or .md document to ground organization-specific answers.
                 </div>
               ) : (
                 docs.map((d) => (
