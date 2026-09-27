@@ -24,7 +24,8 @@ This file is the map for contributors and operators. The production behavior is 
 ├── package.json             # Scripts and dependencies
 ├── package-lock.json        # Reproducible dependency lock
 ├── DEPLOYMENT.md            # Authoritative setup/operations guide
-└── DEPLOYMENT_CHECKLIST.md  # Release sign-off checklist
+├── DEPLOYMENT_CHECKLIST.md  # Release sign-off checklist
+└── docs/                    # Maintained contributor, incident, and AI guidance
 ```
 
 ## Runtime flow
@@ -54,3 +55,21 @@ Local development runs the same Express application through `server.ts`, reducin
 4. Do not seed production-visible data that claims an external action succeeded.
 5. Every new privileged API route must use the shared authentication boundary and receive a regression test.
 6. Every production capability must have a truthful failure/unavailable state.
+
+
+## Documentation ownership
+
+| Resource | Purpose |
+| --- | --- |
+| `README.md` | Short project entry point and current implementation summary |
+| `DEPLOYMENT.md` | Production configuration, secrets, deployment and operations |
+| `DEPLOYMENT_CHECKLIST.md` | Pre-release and post-release verification |
+| `docs/REPOSITORY_STRUCTURE.md` | Source tree ownership and placement rules |
+| `docs/CONVERSATION_GUIDE.md` | Plain-language AI response and terminology standard |
+| `docs/INCIDENT_REVIEW.md` | Historical drift findings and prevention controls |
+
+Old architecture prompts/specifications that claimed unconfigured Cloudflare resources were removed. Git history remains available when historical context is needed.
+
+## Intentionally retained compatibility files
+
+- `cloudflare-worker.js` is a small compatibility re-export to `worker/index.ts`. It is not the authoritative Worker entrypoint; `wrangler.toml` points directly to `worker/index.ts`.
