@@ -24,13 +24,13 @@ export async function getServicesStatus(): Promise<{
   const cfStatus: ServiceStatusInfo = {
     id: 'cloudflare',
     name: 'Cloudflare',
-    role: 'Primary Runtime, Edge APIs & Cloudflare AI',
+    role: 'Cloudflare account API and Workers AI check',
     status: cfRes.valid ? 'operational' : 'degraded',
-    latencyMs: Math.max(18, cfLatency),
+    latencyMs: cfLatency,
     lastChecked: timestamp,
-    version: 'Workers v2026.3',
-    details: cfRes.message || 'Workers runtime, request routing, and Cloudflare AI healthy.',
-    features: ['Serverless Runtime', 'Cloudflare Workers AI', 'Request Routing', 'Zero-Trust Secrets'],
+    version: cfRes.model || 'Workers AI',
+    details: cfRes.message,
+    features: cfRes.valid ? ['Workers AI API verified'] : [],
   };
 
   // 2. Supabase Check
@@ -56,15 +56,15 @@ export async function getServicesStatus(): Promise<{
   const ghStatus: ServiceStatusInfo = {
     id: 'github',
     name: 'GitHub',
-    role: 'Source Code, Commits & PR Automation',
+    role: 'GitHub account connection',
     status: ghRes.valid ? 'operational' : 'offline',
-    latencyMs: Math.max(38, ghLatency),
+    latencyMs: ghLatency,
     lastChecked: timestamp,
     version: 'REST API v3',
     details: ghRes.user
-      ? `Authenticated as @${ghRes.user} with repository & pull_request scopes.`
-      : 'GitHub connection is unavailable.',
-    features: ['Repository Inspection', 'Source Code Analysis', 'Pull Request Automation', 'Commit Verification'],
+      ? `Authenticated as @${ghRes.user}.${ghRes.scopes?.length ? ` Reported OAuth scopes: ${ghRes.scopes.join(', ')}.` : ' GitHub did not report OAuth scopes for this token type.'}`
+      : (ghRes.message || 'GitHub connection is unavailable.'),
+    features: ghRes.valid ? ['Authenticated GitHub API access'] : [],
   };
 
   // 4. Resend Check
