@@ -172,14 +172,14 @@ export const AgentsPlatform: React.FC = () => {
             {
               role: 'agent-call',
               agentName: 'General Agent -> Design Agent',
-              text: 'Delegated task to Design Agent via tool "agent.call". Accessing Figma MCP for token definitions...',
+              text: 'I’m asking the Design Agent to review the available design information.',
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
               toolsUsed: ['agent.call', 'figma.read'],
             },
             {
               role: 'assistant',
               agentName: 'Design Agent',
-              text: 'Design tokens inspected from Figma MCP: Brand gradient `#ff6b35` -> `#f38020` -> `#9333ea`, typography `-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif`. Verified zero-pill aesthetic and high-contrast dark surface tokens (`#12161f`, `#161a22`).',
+              text: 'The Design Agent reviewed the available design settings and can use them to keep the interface consistent.',
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
               toolsUsed: ['figma.read'],
             },
@@ -203,7 +203,7 @@ export const AgentsPlatform: React.FC = () => {
         {
           role: 'assistant',
           agentName: selectedAgent?.name || 'General Agent',
-          text: data.message || 'Understood. Operational plan formulated and verified against tenant permissions.',
+          text: data.message || 'I’m ready to help, but I did not receive a complete answer. Please try again.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           toolsUsed: selectedAgent?.enabledTools.slice(0, 2),
         },
@@ -214,7 +214,7 @@ export const AgentsPlatform: React.FC = () => {
         {
           role: 'assistant',
           agentName: selectedAgent?.name || 'General Agent',
-          text: 'Unable to reach model gateway isolate. Please verify Cloudflare Workers AI connection.',
+          text: 'I can’t reach the AI service right now. Please try again in a moment.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
